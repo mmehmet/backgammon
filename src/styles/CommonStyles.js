@@ -6,10 +6,9 @@ const CS = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLOURS.background
   },
   button: {
-    backgroundColor: COLOURS.primary,
+    backgroundColor: COLOURS.red,
     paddingHorizontal: 40,
     paddingVertical: 15,
     borderRadius: 10

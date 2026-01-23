@@ -1,6 +1,11 @@
 export const COLOURS = {
-  background: '#2c3e50',
-  text: '#ecf0f1',
-  primary: '#e74c3c',
-  white: '#fff',
+  darkBlue: '#2c3e50',
+  sienna: '#A0522D',
+  darkBrown: '#6B5D3F',
+  beige: '#DEB887',
+  mediumBrown: '#8B7355',
+  white: '#FFFFFF',
+  darkGrey: '#3E3E3E',
+  lightGrey: '#ecf0f1',
+  red: '#e74c3c',
 }

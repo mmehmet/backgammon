@@ -2,12 +2,11 @@ import { StyleSheet } from 'react-native'
 import { COLOURS } from '../utils/colours'
 
 const styles = StyleSheet.create({
-  bg: { backgroundColor: COLOURS.darkBlue },
-  title: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: COLOURS.white,
-    marginBottom: 50
+  bg: { backgroundColor: COLOURS.sienna },
+  text: {
+    fontSize: 18,
+    color: COLOURS.lightGrey,
+    lineHeight: 24,
   },
 })
 
