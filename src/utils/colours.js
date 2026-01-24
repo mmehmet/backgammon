@@ -5,7 +5,12 @@ export const COLOURS = {
   beige: '#DEB887',
   mediumBrown: '#8B7355',
   white: '#FFFFFF',
+  mediumGrey: '#666',
   darkGrey: '#3E3E3E',
   lightGrey: '#ecf0f1',
   red: '#e74c3c',
+  black: '#000',
+  offWhite: '#fafafa',
+  offBlack: '#333',
+  disabled: '#ccc',
 }

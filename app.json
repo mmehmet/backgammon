@@ -1,4 +1,7 @@
 {
   "name": "backgammon",
-  "displayName": "backgammon"
+  "displayName": "backgammon",
+  "expo": {
+    "orientation": "landscape"
+  }
 }

@@ -5,7 +5,6 @@ import GameScreen from './src/screens/GameScreen'
 
 const App = () => {
   const [gameActive, setGameActive] = useState(false)
-  console.log('HELP!')
 
   const handleStartGame = () => {
     console.log('Game started')

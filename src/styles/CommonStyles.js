@@ -7,6 +7,7 @@ const CS = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  align: { alignItems: "center" },
   row: { flexDirection: "row" },
   flex: { flex: 1 },
   wrap: { flexWrap: "wrap"},
