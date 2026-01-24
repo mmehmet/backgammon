@@ -1,18 +1,23 @@
 import React from 'react'
-import { View, Text, Pressable } from 'react-native'
+import { View, Pressable } from 'react-native'
 import { Svg, Polygon } from 'react-native-svg'
+import Icon from 'react-native-vector-icons/MaterialIcons'
 
 import { board, resetBoard } from '../game/Board'
 import { Piece } from '../game/Piece'
+import { gameState, setDice } from '../game/State'
 import CS from '../styles/CommonStyles'
 import styles from '../styles/GameStyles'
 import { COLOURS } from '../utils/colours'
 
 const GameScreen = ({ onEndGame }) => {
+  const [resolving, setResolving] = React.useState(false)
+
   resetBoard()
 
   const Triangle = ({ fill, width = 40, height = 120 }) => {
     const points = `0,${height} ${width/2},0 ${width},${height}`
+
     return (
       <Svg width={width} height={height}>
         <Polygon points={points} fill={fill} />
@@ -39,7 +44,7 @@ const GameScreen = ({ onEndGame }) => {
     <View style={styles.controls}>
       <View style={CS.wrap}>
         <Pressable style={styles.button} onPress={onEndGame}>
-          <Text style={styles.text}>End Game</Text>
+          <Icon name="exit-to-app" size={20} color={COLOURS.white} />
         </Pressable>
       </View>
     </View>
@@ -91,6 +96,16 @@ const GameScreen = ({ onEndGame }) => {
         }
       </View>
     )
+  }
+
+  const rollDice = () => {
+    setResolving(true)
+    setTimeout(() => {
+      const die1 = Math.floor(Math.random() * 6) + 1
+      const die2 = Math.floor(Math.random() * 6) + 1
+      setDice(die1, die2)
+      setResolving(false)
+    }, 500 + Math.random() * 1000)
   }
 
   return (
