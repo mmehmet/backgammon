@@ -7,6 +7,9 @@ const CS = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  row: { flexDirection: "row" },
+  flex: { flex: 1 },
+  wrap: { flexWrap: "wrap"},
   button: {
     backgroundColor: COLOURS.red,
     paddingHorizontal: 40,
@@ -17,7 +20,7 @@ const CS = StyleSheet.create({
     color: COLOURS.white,
     fontSize: 24,
     fontWeight: 'bold'
-  }
+  },
 })
 
 export default CS

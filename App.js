@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { View } from 'react-native'
 import StartScreen from './src/screens/StartScreen'
 import GameScreen from './src/screens/GameScreen'
 
 const App = () => {
   const [gameActive, setGameActive] = useState(false)
+  console.log('HELP!')
 
   const handleStartGame = () => {
     console.log('Game started')
@@ -17,13 +18,13 @@ const App = () => {
   }
 
   return (
-    <SafeAreaProvider>
+    <View style={{ flex: 1 }}>
       {gameActive ? (
         <GameScreen onEndGame={handleEndGame} />
       ) : (
         <StartScreen onStartGame={handleStartGame} />
       )}
-    </SafeAreaProvider>
+    </View>
   )
 }
 

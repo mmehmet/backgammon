@@ -1,7 +1,7 @@
 export const COLOURS = {
   darkBlue: '#2c3e50',
   sienna: '#A0522D',
-  darkBrown: '#6B5D3F',
+  darkBrown: '#6b513f',
   beige: '#DEB887',
   mediumBrown: '#8B7355',
   white: '#FFFFFF',
