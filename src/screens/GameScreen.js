@@ -3,6 +3,7 @@ import { View, Pressable, Text } from 'react-native'
 import { Svg, Polygon } from 'react-native-svg'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 
+import { AnimatedDice } from '../game/AnimatedDice'
 import { board, resetBoard } from '../game/Board'
 import { Dice } from '../game/Dice'
 import { Piece } from '../game/Piece'
@@ -15,7 +16,7 @@ import { getRoll, ucFirst } from '../utils/helpers'
 
 const GameScreen = ({ onEndGame }) => {
   const [message, setMessage] = React.useState('')
-  const [resolving, setResolving] = React.useState(false)
+  const [resolving, setResolving] = React.useState(null)
   const [whiteRoll, setWhiteRoll] = React.useState(0)
   const [blackRoll, setBlackRoll] = React.useState(0)
   const { phase, startGame } = useGameStore()
@@ -90,30 +91,20 @@ const GameScreen = ({ onEndGame }) => {
 
       <View style={[CS.row]}>
         <View style={styles.rollSection}>
-          {whiteRoll > 0 ? (
-            <Dice value={whiteRoll} />
-          ) : (
-            <Pressable
-              style={[CS.button, CS.bgWhite, resolving && CS.buttonDisabled]}
-              onPress={() => roll(WHITE)}
-              disabled={resolving}
-            >
-              <Text style={[CS.buttonText, CS.buttonTextDark]}>Roll</Text>
-            </Pressable>
+          {whiteRoll > 0 && <Dice value={whiteRoll} />}
+          {whiteRoll === 0 && (
+            resolving === WHITE
+              ? <AnimatedDice color={WHITE} />
+              : <RollButton player={WHITE} onPress={() => roll(WHITE)} />
           )}
         </View>
 
         <View style={styles.rollSection}>
-          {blackRoll > 0 ? (
-            <Dice value={blackRoll} inverted />
-          ) : (
-            <Pressable
-              style={[CS.button, CS.bgBlack, resolving && CS.buttonDisabled]}
-              onPress={() => roll(BLACK)}
-              disabled={resolving || whiteRoll === 0}
-            >
-              <Text style={CS.buttonText}>Roll</Text>
-            </Pressable>
+          {blackRoll > 0 && <Dice value={blackRoll} inverted />}
+          {blackRoll === 0 && (
+            resolving === BLACK
+              ? <AnimatedDice color={BLACK} />
+              : <RollButton player={BLACK} onPress={() => roll(BLACK)} />
           )}
         </View>
       </View>
@@ -162,7 +153,7 @@ const GameScreen = ({ onEndGame }) => {
   }
 
   const roll = (player) => {
-    setResolving(true)
+    setResolving(player)
     setTimeout(() => {
       const die1 = getRoll()
       if (!player) {
@@ -174,8 +165,17 @@ const GameScreen = ({ onEndGame }) => {
         player === WHITE ? setWhiteRoll(die1) : setBlackRoll(die1)
       }
       console.log(player, die1)
-      setResolving(false)
+      setResolving(null)
     }, 500 + Math.random() * 1000)
+  }
+
+  const RollButton = ({ player, onPress }) => {
+    const isWhite = player === WHITE
+    return (
+      <Pressable style={[CS.button, isWhite ? CS.bgWhite : CS.bgBlack]} onPress={onPress}>
+        <Text style={[CS.buttonText, isWhite && CS.buttonTextDark]}>Roll</Text>
+      </Pressable>
+    )
   }
 
   const Triangle = ({ fill, width = 40, height = 120 }) => {
