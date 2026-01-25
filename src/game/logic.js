@@ -1,5 +1,5 @@
 import { WHITE, BLACK, HOME } from "../utils/constants"
-import { board, bar, bearOff } from "./board"
+import { board, bar, bearOff } from "./Board"
 
 export const applyMove = (from, roll, player) => {
   // take piece from the starting position

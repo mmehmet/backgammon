@@ -22,10 +22,11 @@ const styles = StyleSheet.create({
   frameTop: { flex: 1, justifyContent: "flex-start" },
   frameBottom: { flex: 1, justifyContent: "flex-end" },
   button: {
-    backgroundColor: COLOURS.darkBlue,
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderRadius: 6,
+    borderWidth: 1,
+    borderColor: COLOURS.white,
   },
   text: {
     fontSize: 18,
@@ -33,6 +34,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   tile: { position: 'absolute', width: '100%', alignItems: 'center' },
+  rollSection: { padding: 8, flex: 1, alignItems: 'center', justifyContent: "center" },
 })
 
 export default styles

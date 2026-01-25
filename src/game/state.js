@@ -1,31 +1,34 @@
-import { BLACK, WHITE } from "../utils/constants"
+import { create } from 'zustand'
+import { PHASE, WHITE, BLACK } from '../utils/constants'
 
-export const gameState = {
+export const useGameStore = create((set) => ({
   currentPlayer: null,
   dice: [],
-  remainingMoves: []
-}
+  remainingMoves: [],
+  phase: PHASE.OPENING,
 
-export const switchPlayer = () => {
-  gameState.currentPlayer = gameState.currentPlayer === WHITE ? BLACK : WHITE
-}
+  setDice: (die1, die2) => set({
+    dice: [die1, die2],
+    remainingMoves: die1 === die2 ? [die1, die1, die1, die2] : [die1, die2]
+  }),
 
-export const setDice = (die1, die2) => {
-  gameState.dice = [die1, die2]
-  gameState.remainingMoves = die1 === die2
-    ? [die1, die1, die1, die1]
-    : [die1, die2]
-}
+  switchPlayer: () => set((state) => ({
+    currentPlayer: state.currentPlayer === WHITE ? BLACK : WHITE
+  })),
 
-export const useMove = (roll) => {
-  const index = gameState.remainingMoves.indexOf(roll)
-  if (index > -1) {
-    gameState.remainingMoves.splice(index, 1)
-  }
-}
+  useMove: (roll) => set((state) => ({
+    remainingMoves: state.remainingMoves.filter((_, i) => i !== state.remainingMoves.indexOf(roll))
+  })),
 
-export const resetState = () => {
-  gameState.currentPlayer = null
-  gameState.dice = []
-  gameState.remainingMoves = []
-}
+  startGame: (startingPlayer) => set({
+    currentPlayer: startingPlayer,
+    phase: PHASE.PLAYING
+  }),
+
+  resetState: () => set({
+    currentPlayer: null,
+    dice: [],
+    remainingMoves: [],
+    phase: PHASE.OPENING
+  })
+}))

@@ -17,18 +17,21 @@ const styles = StyleSheet.create({
         height: 8,
         borderRadius: 4,
         backgroundColor: COLOURS.black,
+        marginHorizontal: 2,
     },
     row: {
         flexDirection: 'row',
-        justifyContent: 'space-around',
-        width: '100%',
-        paddingHorizontal: 6,
+        gap: 4,
+        paddingHorizontal: 8,
     },
     column: {
         justifyContent: 'space-around',
         height: '100%',
         paddingVertical: 6,
     },
+    left: { alignSelf: "flex-start" },
+    center: { alignSelf: "center" },
+    right: { alignSelf: "flex-end" },
 })
 
 export default styles

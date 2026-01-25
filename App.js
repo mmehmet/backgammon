@@ -2,12 +2,17 @@ import React, { useState } from 'react'
 import { View } from 'react-native'
 import StartScreen from './src/screens/StartScreen'
 import GameScreen from './src/screens/GameScreen'
+import { resetBoard } from './src/game/Board'
+import { useGameStore } from './src/game/State'
 
 const App = () => {
   const [gameActive, setGameActive] = useState(false)
+  const resetState = useGameStore(state => state.resetState)
 
   const handleStartGame = () => {
     console.log('Game started')
+    resetBoard()
+    resetState()
     setGameActive(true)
   }
 
