@@ -9,3 +9,10 @@ export const PHASE = {
   PLAYING: 'PLAYING',
   FINISHED: 'FINISHED'
 }
+export const MSG = {
+  CAN_ROLL: '{player} can roll',
+  ROLLED_DOUBLE: '{player} has rolled a double!',
+  MOVES_REMAINING: '{player} has {count} {move} remaining',
+  NO_LEGAL_MOVES: '{player} has no legal moves - switching to {nextPlayer}',
+  EMPTY: ''
+}

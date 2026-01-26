@@ -1,11 +1,12 @@
 import React from 'react'
 import { View, Pressable, Text } from 'react-native'
-import { Svg, Polygon } from 'react-native-svg'
+import { Svg, Polygon, Line } from 'react-native-svg'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 
 import { AnimatedDice } from '../game/AnimatedDice'
 import { board, resetBoard } from '../game/Board'
 import { Dice } from '../game/Dice'
+import { getLegalMoves, getOpponent } from '../game/Logic'
 import { Piece } from '../game/Piece'
 import { useGameStore } from '../game/State'
 import CS from '../styles/CommonStyles'
@@ -19,7 +20,16 @@ const GameScreen = ({ onEndGame }) => {
   const [resolving, setResolving] = React.useState(null)
   const [whiteRoll, setWhiteRoll] = React.useState(0)
   const [blackRoll, setBlackRoll] = React.useState(0)
-  const { phase, startGame, setDice, dice, currentPlayer, remainingMoves } = useGameStore()
+  const [legal, setLegal] = React.useState([])
+  
+  const {
+    phase,
+    startGame,
+    setDice,
+    dice,
+    currentPlayer,
+    remainingMoves,
+  } = useGameStore()
 
   React.useEffect(() => {
     if (whiteRoll > 0 && blackRoll > 0) {
@@ -41,17 +51,35 @@ const GameScreen = ({ onEndGame }) => {
   React.useEffect(() => {
     if (phase !== PHASE.PLAYING || !currentPlayer) return
 
-    if (dice.length === 0 && !resolving) {
+    if (dice.length > 0) {
+      const available = getLegalMoves(currentPlayer, remainingMoves)
+      setTimeout(() => {
+        setMessage(MSG.EMPTY)
+        if (dice[0] === dice[1]) {
+          // Just rolled a double
+          setMessage(formatMsg(MSG.ROLLED_DOUBLE, { player: ucFirst(currentPlayer) }))
+        }
+      }, 200)
+      setLegal(available)
+    } else {
       // Ready to roll
       setMessage(formatMsg(MSG.CAN_ROLL, { player: ucFirst(currentPlayer) }))
-    } else if (dice.length > 0 && dice[0] === dice[1]) {
-      // Just rolled a double
-      setMessage(formatMsg(MSG.ROLLED_DOUBLE, { player: ucFirst(currentPlayer) }))
-    } else if (dice.length > 0) {
-      // Just rolled, not a double
-      setMessage(MSG.EMPTY)
+      setLegal([])
     }
-  }, [phase, currentPlayer, dice, resolving])
+  }, [phase, currentPlayer, dice])
+
+  React.useEffect(() => {
+    if (remainingMoves.length < 1) return
+
+    if (legal.length > 0) {
+      console.log("remainingMoves", remainingMoves, "legal moves", legal)
+    } else {
+      setMessage(formatMsg(MSG.NO_LEGAL_MOVES, {
+        player: ucFirst(currentPlayer),
+        nextPlayer: ucFirst(getOpponent(currentPlayer))
+      }))
+    }
+  }, [remainingMoves, legal])
 
   const determineStarter = () => {
     if (whiteRoll === 0 || blackRoll === 0) return null
@@ -89,20 +117,30 @@ const GameScreen = ({ onEndGame }) => {
     if (!currentPlayer) return null
 
     const inverted = currentPlayer === BLACK
-    let content = resolving
-     ?
+    let content = !resolving
+      ?
+      <RollButton onPress={() => roll(currentPlayer)} />
+      :
       <>
         <AnimatedDice color={currentPlayer} />
         <AnimatedDice color={currentPlayer} />
-     </>
-     :
-     <RollButton onPress={() => roll(currentPlayer)} />
-     if (dice.length > 0) {
-      content = <>
-            <Dice value={dice[0]} inverted={inverted} />
-            <Dice value={dice[1]} inverted={inverted} />
       </>
-     }
+
+    if (dice.length > 0) {
+      if (dice[0] === dice[1]) {
+        content = <>
+          <Dice value={dice[0]} inverted={inverted} />
+          <Dice value={dice[0]} inverted={inverted} />
+          <Dice value={dice[0]} inverted={inverted} />
+          <Dice value={dice[0]} inverted={inverted} />
+        </>
+      } else {
+        content = <>
+          <Dice value={dice[0]} inverted={inverted} />
+          <Dice value={dice[1]} inverted={inverted} />
+        </>
+      }
+    }
 
     return (
       <View style={styles.controls}>
@@ -156,17 +194,20 @@ const GameScreen = ({ onEndGame }) => {
     const points = ascending
      ? board.slice(start, end + 1)
      : board.slice(end, start + 1).reverse()
+    const validFrom = [...new Set(legal.map(m => m.from))]
 
     return (
       <View style={[CS.row, CS.wrap]}>
         {
           points.map((point, idx) => {
             const fill = idx % 2 === 0 ? COLOURS.beige : COLOURS.darkGrey
+            const position = ascending ? start + idx : start - idx
+            const canMove = validFrom.includes(position)
 
             return (
               <View key={idx}>
                 <View style={{ transform: [{ rotate: `${rotation}deg` }] }}>
-                  <Triangle fill={fill} />
+                  <Triangle fill={fill} highlight={canMove} />
                 </View>
                 
                 {
@@ -217,12 +258,22 @@ const GameScreen = ({ onEndGame }) => {
     )
   }
 
-  const Triangle = ({ fill, width = 40, height = 120 }) => {
-    const points = `0,${height} ${width/2},0 ${width},${height}`
+  const Triangle = ({ fill, highlight = false, width = 40, height = 120 }) => {
+    const points = `0,${height} ${width / 2},0 ${width},${height}`
 
     return (
       <Svg width={width} height={height}>
         <Polygon points={points} fill={fill} />
+        {highlight && (
+          <Line
+            x1="0"
+            y1={height}
+            x2={width}
+            y2={height}
+            stroke={COLOURS.green}
+            strokeWidth="4"
+          />
+        )}
       </Svg>
     )
   }

@@ -42,11 +42,13 @@ export const canBearOff = (player) => {
 export const getLegalMoves = (player, remainingMoves) => {
   const moves = []
   const positions = bar[player] > 0 ? [0] : board
+  const uniqueRolls = [...new Set(remainingMoves)]
+  
   positions.forEach((p, i) => {
     if (i === 0 || p?.color === player) {
-      for (const roll of remainingMoves) {
+      for (const roll of uniqueRolls) {
         if (isLegalMove(i, roll, player)) {
-          moves.push({ from: i, roll })
+          moves.push({  roll, from: i })
         }
       }
     }
@@ -54,6 +56,8 @@ export const getLegalMoves = (player, remainingMoves) => {
 
   return moves
 }
+
+export const getOpponent = (player) => player === WHITE ? BLACK : WHITE
 
 export const hasWon = (player) => bearOff[player] === 15
 
@@ -83,5 +87,3 @@ const getDestination = (from, roll, player) => {
 
   return from + roll * (player === WHITE ? 1 : -1)
 }
-
-const getOpponent = (player) => player === WHITE ? BLACK : WHITE

@@ -10,7 +10,13 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     backgroundColor: COLOURS.darkBrown,
   },
-  controls: { backgroundColor: COLOURS.black, flex: 1, alignItems: "center" },
+  controls: {
+    flex: 1,
+    backgroundColor: COLOURS.black,
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 8,
+  },
   gutter: { width: 40, gap: 1 },
   cubeFrame: { maxHeight: 40 },
   frame: {
@@ -28,11 +34,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLOURS.white,
   },
-  text: {
-    fontSize: 18,
-    color: COLOURS.lightGrey,
-    lineHeight: 24,
-  },
+  buttonRed: { borderWidth: 0, backgroundColor: COLOURS.red },
+  text: { fontSize: 18, color: COLOURS.lightGrey, lineHeight: 24 },
+  message: { fontSize: 14, color: COLOURS.lightGrey, lineHeight: 18 },
   tile: { position: 'absolute', width: '100%', alignItems: 'center' },
   rollSection: { padding: 8, flex: 1, alignItems: 'center', justifyContent: "center" },
 })
