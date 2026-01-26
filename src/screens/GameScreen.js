@@ -164,9 +164,8 @@ const GameScreen = ({ onEndGame }) => {
         // Opening roll - single die
         player === WHITE ? setWhiteRoll(die1) : setBlackRoll(die1)
       }
-      console.log(player, die1)
       setResolving(null)
-    }, 500 + Math.random() * 1000)
+    }, 840)
   }
 
   const RollButton = ({ player, onPress }) => {
@@ -189,7 +188,6 @@ const GameScreen = ({ onEndGame }) => {
   }
 
   resetBoard()
-  console.log(phase)
 
   return (
     <View style={[styles.container, isOpening() ? CS.bgBlue : null]}>

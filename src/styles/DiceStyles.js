@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     column: {
         justifyContent: 'space-around',
         height: '100%',
-        paddingVertical: 6,
+        paddingVertical: 4,
     },
     left: { alignSelf: "flex-start" },
     center: { alignSelf: "center" },
