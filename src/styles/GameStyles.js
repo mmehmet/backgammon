@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native'
 import { COLOURS } from '../utils/colours'
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLOURS.black, padding: 24 },
+  container: { flex: 1, backgroundColor: COLOURS.black, padding: 16 },
   board: {
     flex: 1,
     gap: 2,
