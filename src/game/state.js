@@ -6,6 +6,7 @@ export const useGameStore = create((set) => ({
   dice: [],
   remainingMoves: [],
   phase: PHASE.OPENING,
+  rolls: 0,
 
   setDice: (die1, die2) => set({
     dice: [die1, die2],
@@ -13,7 +14,8 @@ export const useGameStore = create((set) => ({
   }),
 
   switchPlayer: () => set((state) => ({
-    currentPlayer: state.currentPlayer === WHITE ? BLACK : WHITE
+    currentPlayer: state.currentPlayer === WHITE ? BLACK : WHITE,
+    rolls: state.rolls + 1
   })),
 
   useMove: (roll) => set((state) => ({
@@ -22,13 +24,15 @@ export const useGameStore = create((set) => ({
 
   startGame: (startingPlayer) => set({
     currentPlayer: startingPlayer,
-    phase: PHASE.PLAYING
+    phase: PHASE.PLAYING,
+    rolls: 0,
   }),
 
   resetState: () => set({
     currentPlayer: null,
     dice: [],
     remainingMoves: [],
-    phase: PHASE.OPENING
+    phase: PHASE.OPENING,
+    rolls: 0,
   })
 }))

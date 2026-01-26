@@ -41,7 +41,7 @@ export const Piece = ({ color, size = 28 }) => {
                 cy={size / 2}
                 r={size / 2 - 7}
                 stroke={COLOURS.disabled}
-                strokeWidth={2}
+                strokeWidth={0.7}
                 fill="none"
                 opacity={0.25}
             />

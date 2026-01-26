@@ -13,5 +13,7 @@ export const COLOURS = {
   offWhite: '#fafafa',
   offBlack: '#111',
   disabled: '#ccc',
-  green: '#8efa11'
+  green: '#8efa11',
+  blue: '#33cafe',
+  yellow: '#ff5',
 }

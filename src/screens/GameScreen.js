@@ -1,7 +1,8 @@
 import React from 'react'
 import { View, Pressable, Text } from 'react-native'
 import { Svg, Polygon, Line } from 'react-native-svg'
-import Icon from 'react-native-vector-icons/MaterialIcons'
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons'
+import FAIcon from 'react-native-vector-icons/FontAwesome5'
 
 import { AnimatedDice } from '../game/AnimatedDice'
 import { board, resetBoard } from '../game/Board'
@@ -29,21 +30,22 @@ const GameScreen = ({ onEndGame }) => {
     dice,
     currentPlayer,
     remainingMoves,
+    rolls,
   } = useGameStore()
 
   React.useEffect(() => {
     if (whiteRoll > 0 && blackRoll > 0) {
       const starter = determineStarter()
-      const label = ucFirst(starter)
       if (starter) {
-        setMessage(`${label} has the higher roll and will start...`)
-        setTimeout(() => startGame(starter), 2000) // brief pause to show result
+        console.log(starter)
+        setMessage(formatMsg(MSG.START, { player: ucFirst(starter) }))
+        startGame(starter)
       } else {
         setTimeout(() => {
           setWhiteRoll(0)
           setBlackRoll(0)
-          setMessage("It's a tie! Roll again...")
-        }, 2000) // show tie, then reset
+          setMessage(MSG.TIE)
+        }, 1500)
       }
     }
   }, [whiteRoll, blackRoll])
@@ -52,19 +54,28 @@ const GameScreen = ({ onEndGame }) => {
     if (phase !== PHASE.PLAYING || !currentPlayer) return
 
     if (dice.length > 0) {
+      setMessage(MSG.EMPTY)
       const available = getLegalMoves(currentPlayer, remainingMoves)
-      setTimeout(() => {
-        setMessage(MSG.EMPTY)
-        if (dice[0] === dice[1]) {
-          // Just rolled a double
-          setMessage(formatMsg(MSG.ROLLED_DOUBLE, { player: ucFirst(currentPlayer) }))
-        }
-      }, 200)
       setLegal(available)
+
+      if (!available.length) {
+        setMessage(formatMsg(MSG.NO_LEGAL_MOVES, {
+          player: ucFirst(currentPlayer),
+          nextPlayer: ucFirst(getOpponent(currentPlayer))
+        }))
+        return
+      }
+
+      if (dice[0] === dice[1]) {
+        // Just rolled a double
+        setMessage(formatMsg(MSG.DOUBLE, { player: ucFirst(currentPlayer) }))
+      }
     } else {
-      // Ready to roll
-      setMessage(formatMsg(MSG.CAN_ROLL, { player: ucFirst(currentPlayer) }))
       setLegal([])
+      if (rolls > 1) {
+        // Ready to roll
+        setMessage(formatMsg(MSG.CAN_ROLL, { player: ucFirst(currentPlayer) }))
+      }
     }
   }, [phase, currentPlayer, dice])
 
@@ -73,11 +84,6 @@ const GameScreen = ({ onEndGame }) => {
 
     if (legal.length > 0) {
       console.log("remainingMoves", remainingMoves, "legal moves", legal)
-    } else {
-      setMessage(formatMsg(MSG.NO_LEGAL_MOVES, {
-        player: ucFirst(currentPlayer),
-        nextPlayer: ucFirst(getOpponent(currentPlayer))
-      }))
     }
   }, [remainingMoves, legal])
 
@@ -92,7 +98,7 @@ const GameScreen = ({ onEndGame }) => {
   const ExitButton = () => (
     <Pressable style={[styles.button, CS.row, CS.gap]} onPress={onEndGame}>
       <Text style={CS.buttonText}>Exit</Text>
-      <Icon name="exit-to-app" size={20} color={COLOURS.white} />
+      <MaterialIcon name="exit-to-app" size={20} color={COLOURS.white} />
     </Pressable>
   )
 
@@ -233,6 +239,7 @@ const GameScreen = ({ onEndGame }) => {
 
   const roll = (player) => {
     setResolving(player)
+    setMessage('')
     setTimeout(() => {
       const die1 = getRoll()
       if (phase === PHASE.PLAYING) {
@@ -250,10 +257,16 @@ const GameScreen = ({ onEndGame }) => {
   const RollButton = ({ player = null, onPress }) => {
     const isWhite = player === WHITE
     const bg = !player ? CS.bgBlue : CS.bgBlack
+    const font = !currentPlayer ? null : CS.buttonTextRegular
 
     return (
-      <Pressable style={[CS.button, CS.align, isWhite ? CS.bgWhite : bg]} onPress={onPress}>
-        <Text style={[CS.buttonText, isWhite && CS.buttonTextDark]}>Roll</Text>
+      <Pressable style={[CS.button, CS.align, CS.row,, CS.gap, isWhite ? CS.bgWhite : bg]} onPress={onPress}>
+        <Text style={[CS.buttonText, font, isWhite && CS.buttonTextDark]}>Roll</Text>
+        {
+          !currentPlayer
+            ? null
+            : <FAIcon name="dice" size={20} color={isWhite ? COLOURS.black : COLOURS.white} />
+        }
       </Pressable>
     )
   }
@@ -271,7 +284,7 @@ const GameScreen = ({ onEndGame }) => {
             x2={width}
             y2={height}
             stroke={COLOURS.green}
-            strokeWidth="4"
+            strokeWidth="6"
           />
         )}
       </Svg>

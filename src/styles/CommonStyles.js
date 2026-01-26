@@ -28,6 +28,7 @@ const CS = StyleSheet.create({
     lineHeight: 24,
   },
   buttonTextDark: { color: COLOURS.offBlack },
+  buttonTextRegular: { fontWeight: 400 },
 })
 
 export default CS
