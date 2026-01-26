@@ -11,21 +11,22 @@ import { useGameStore } from '../game/State'
 import CS from '../styles/CommonStyles'
 import styles from '../styles/GameStyles'
 import { COLOURS } from '../utils/colours'
-import { PHASE, BLACK, WHITE } from '../utils/constants'
-import { getRoll, ucFirst } from '../utils/helpers'
+import { PHASE, BLACK, WHITE, MSG } from '../utils/constants'
+import { getRoll, ucFirst, formatMsg } from '../utils/helpers'
 
 const GameScreen = ({ onEndGame }) => {
   const [message, setMessage] = React.useState('')
   const [resolving, setResolving] = React.useState(null)
   const [whiteRoll, setWhiteRoll] = React.useState(0)
   const [blackRoll, setBlackRoll] = React.useState(0)
-  const { phase, startGame } = useGameStore()
+  const { phase, startGame, setDice, dice, currentPlayer, remainingMoves } = useGameStore()
 
   React.useEffect(() => {
     if (whiteRoll > 0 && blackRoll > 0) {
       const starter = determineStarter()
+      const label = ucFirst(starter)
       if (starter) {
-        setMessage(`${ucFirst(starter)} has the higher roll and will start...`)
+        setMessage(`${label} has the higher roll and will start...`)
         setTimeout(() => startGame(starter), 2000) // brief pause to show result
       } else {
         setTimeout(() => {
@@ -36,6 +37,21 @@ const GameScreen = ({ onEndGame }) => {
       }
     }
   }, [whiteRoll, blackRoll])
+
+  React.useEffect(() => {
+    if (phase !== PHASE.PLAYING || !currentPlayer) return
+
+    if (dice.length === 0 && !resolving) {
+      // Ready to roll
+      setMessage(formatMsg(MSG.CAN_ROLL, { player: ucFirst(currentPlayer) }))
+    } else if (dice.length > 0 && dice[0] === dice[1]) {
+      // Just rolled a double
+      setMessage(formatMsg(MSG.ROLLED_DOUBLE, { player: ucFirst(currentPlayer) }))
+    } else if (dice.length > 0) {
+      // Just rolled, not a double
+      setMessage(MSG.EMPTY)
+    }
+  }, [phase, currentPlayer, dice, resolving])
 
   const determineStarter = () => {
     if (whiteRoll === 0 || blackRoll === 0) return null
@@ -69,13 +85,35 @@ const GameScreen = ({ onEndGame }) => {
     </View>
   )
 
-  const renderControls = () => (
-    <View style={styles.controls}>
-      <View style={CS.wrap}>
+  const renderControls = () => {
+    if (!currentPlayer) return null
+
+    const inverted = currentPlayer === BLACK
+    let content = resolving
+     ?
+      <>
+        <AnimatedDice color={currentPlayer} />
+        <AnimatedDice color={currentPlayer} />
+     </>
+     :
+     <RollButton onPress={() => roll(currentPlayer)} />
+     if (dice.length > 0) {
+      content = <>
+            <Dice value={dice[0]} inverted={inverted} />
+            <Dice value={dice[1]} inverted={inverted} />
+      </>
+     }
+
+    return (
+      <View style={styles.controls}>
+        <Text style={styles.message}>{message}</Text>
+
+        <View style={[CS.row, CS.gap]}>{content}</View>
+
         <ExitButton />
       </View>
-    </View>
-  )
+    )
+  }
 
   const renderGutter = () => (
     <View style={styles.gutter}>
@@ -89,7 +127,7 @@ const GameScreen = ({ onEndGame }) => {
     <View style={CS.container}>
       <Text style={styles.text}>{message || 'Roll to determine who starts'}</Text>
 
-      <View style={[CS.row]}>
+      <View style={CS.row}>
         <View style={styles.rollSection}>
           {whiteRoll > 0 && <Dice value={whiteRoll} />}
           {whiteRoll === 0 && (
@@ -156,7 +194,7 @@ const GameScreen = ({ onEndGame }) => {
     setResolving(player)
     setTimeout(() => {
       const die1 = getRoll()
-      if (!player) {
+      if (phase === PHASE.PLAYING) {
         // Gameplay roll - two dice
         const die2 = getRoll()
         setDice(die1, die2)
@@ -168,10 +206,12 @@ const GameScreen = ({ onEndGame }) => {
     }, 840)
   }
 
-  const RollButton = ({ player, onPress }) => {
+  const RollButton = ({ player = null, onPress }) => {
     const isWhite = player === WHITE
+    const bg = !player ? CS.bgBlue : CS.bgBlack
+
     return (
-      <Pressable style={[CS.button, isWhite ? CS.bgWhite : CS.bgBlack]} onPress={onPress}>
+      <Pressable style={[CS.button, CS.align, isWhite ? CS.bgWhite : bg]} onPress={onPress}>
         <Text style={[CS.buttonText, isWhite && CS.buttonTextDark]}>Roll</Text>
       </Pressable>
     )
