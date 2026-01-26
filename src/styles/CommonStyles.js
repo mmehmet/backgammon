@@ -6,19 +6,29 @@ const CS = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLOURS.background
   },
+  align: { alignItems: "center" },
+  row: { flexDirection: "row" },
+  flex: { flex: 1 },
+  gap: { gap: 8 },
+  wrap: { flexWrap: "wrap"},
   button: {
-    backgroundColor: COLOURS.primary,
+    backgroundColor: COLOURS.red,
     paddingHorizontal: 40,
     paddingVertical: 15,
     borderRadius: 10
   },
+  bgBlack: { backgroundColor: COLOURS.black },
+  bgBlue: { backgroundColor: COLOURS.darkBlue },
+  bgWhite: { backgroundColor: COLOURS.offWhite },
   buttonText: {
     color: COLOURS.white,
     fontSize: 24,
-    fontWeight: 'bold'
-  }
+    fontWeight: 'bold',
+    lineHeight: 24,
+  },
+  buttonTextDark: { color: COLOURS.offBlack },
+  buttonTextRegular: { fontWeight: 400 },
 })
 
 export default CS
