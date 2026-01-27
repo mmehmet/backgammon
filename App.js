@@ -1,13 +1,14 @@
 import React, { useState } from 'react'
-import { View } from 'react-native'
-import StartScreen from './src/screens/StartScreen'
+import { GestureHandlerRootView } from "react-native-gesture-handler"
+
+import { useGameStore } from './src/components/State'
 import GameScreen from './src/screens/GameScreen'
-import { resetBoard } from './src/game/Board'
-import { useGameStore } from './src/game/State'
+import StartScreen from './src/screens/StartScreen'
+import CS from "./src/styles/CommonStyles";
 
 const App = () => {
   const [gameActive, setGameActive] = useState(false)
-  const resetState = useGameStore(state => state.resetState)
+  const { resetState, resetBoard } = useGameStore();
 
   const handleStartGame = () => {
     console.log('Game started')
@@ -22,13 +23,13 @@ const App = () => {
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <GestureHandlerRootView style={CS.flex}>
       {gameActive ? (
         <GameScreen onEndGame={handleEndGame} />
       ) : (
         <StartScreen onStartGame={handleStartGame} />
       )}
-    </View>
+    </GestureHandlerRootView>
   )
 }
 
