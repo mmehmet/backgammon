@@ -4,6 +4,16 @@ export const HOME = {
   [WHITE]: [1, 2, 3, 4, 5, 6],
   [BLACK]: [24, 23, 22, 21, 20, 19]
 }
+export const STARTING_POSITIONS = {
+  1: { count: 2, color: WHITE },
+  6: { count: 5, color: BLACK },
+  8: { count: 3, color: BLACK },
+  12: { count: 5, color: WHITE },
+  13: { count: 5, color: BLACK },
+  17: { count: 3, color: WHITE },
+  19: { count: 5, color: WHITE },
+  24: { count: 2, color: BLACK }
+}
 export const PHASE = {
   OPENING: 'OPENING',
   PLAYING: 'PLAYING',
