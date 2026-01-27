@@ -12,6 +12,8 @@ const CS = StyleSheet.create({
   flex: { flex: 1 },
   gap: { gap: 8 },
   wrap: { flexWrap: "wrap"},
+  top: { top: 0 },
+  bottom: { bottom: 0 },
   button: {
     backgroundColor: COLOURS.red,
     paddingHorizontal: 40,
