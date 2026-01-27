@@ -2,7 +2,7 @@ import { Animated } from 'react-native'
 import { useEffect, useRef, useState } from 'react'
 import Sound from 'react-native-sound'
 import { Dice } from './Dice'
-import { AUDIO, BLACK } from '../utils/constants'
+import { BLACK } from '../utils/constants'
 
 Sound.setCategory('Playback')
 
@@ -38,7 +38,7 @@ export const AnimatedDice = ({ color }) => {
     return () => {
       clearInterval(cycleInterval.current)
     }
-  }, [])
+  }, [rotateAnim])
 
   const spin = rotateAnim.interpolate({
     inputRange: [0, 1],
