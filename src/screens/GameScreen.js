@@ -1,15 +1,15 @@
 import React from 'react'
-import { View, Pressable, Text } from 'react-native'
-import { Svg, Polygon, Line } from 'react-native-svg'
-import MaterialIcon from 'react-native-vector-icons/MaterialIcons'
-import FAIcon from 'react-native-vector-icons/FontAwesome5'
+import { View, Text, Dimensions } from 'react-native'
 
-import { AnimatedDice } from '../game/AnimatedDice'
-import { board, resetBoard } from '../game/Board'
-import { Dice } from '../game/Dice'
-import { getLegalMoves, getOpponent } from '../game/Logic'
-import { Piece } from '../game/Piece'
-import { useGameStore } from '../game/State'
+import { AnimatedDice } from '../components/AnimatedDice'
+import { Dice } from '../components/Dice'
+import { DraggablePiece } from "../components/DraggablePiece"
+import { ExitButton } from '../components/ExitButton'
+import { getOpponent, getDestination } from '../components/Logic'
+import { Piece } from '../components/Piece'
+import { RollButton } from "../components/RollButton"
+import { useGameStore } from '../components/State'
+import { Triangle } from "../components/Triangle"
 import CS from '../styles/CommonStyles'
 import styles from '../styles/GameStyles'
 import { COLOURS } from '../utils/colours'
@@ -22,18 +22,39 @@ const GameScreen = ({ onEndGame }) => {
   const [whiteRoll, setWhiteRoll] = React.useState(0)
   const [blackRoll, setBlackRoll] = React.useState(0)
   const [legal, setLegal] = React.useState([])
-  
+  const [dragging, setDragging] = React.useState(null) // { from, pieceX, pieceY }
+  const [validDestinations, setValidDestinations] = React.useState([])
+  const [places, setPlaces] = React.useState({})
+
+  const topHalf = Dimensions.get('window').height / 2
   const {
-    phase,
-    startGame,
-    setDice,
-    dice,
+    board,
+    bar,
+    bearOff,
     currentPlayer,
+    dice,
     remainingMoves,
+    phase,
     rolls,
+    resetBoard,
+    applyMove,
+    canBearOff,
+    executeMove,
+    getLegalMoves,
+    setDice,
+    switchPlayer,
+    startGame,
   } = useGameStore()
 
   React.useEffect(() => {
+    const determineStarter = () => {
+      if (whiteRoll === 0 || blackRoll === 0) return null
+      if (whiteRoll > blackRoll) return WHITE
+      if (blackRoll > whiteRoll) return BLACK
+
+      return null  // tie
+    }
+
     if (whiteRoll > 0 && blackRoll > 0) {
       const starter = determineStarter()
       if (starter) {
@@ -48,7 +69,7 @@ const GameScreen = ({ onEndGame }) => {
         }, 1500)
       }
     }
-  }, [whiteRoll, blackRoll])
+  }, [whiteRoll, blackRoll, startGame])
 
   React.useEffect(() => {
     if (phase !== PHASE.PLAYING || !currentPlayer) return
@@ -77,7 +98,7 @@ const GameScreen = ({ onEndGame }) => {
         setMessage(formatMsg(MSG.CAN_ROLL, { player: ucFirst(currentPlayer) }))
       }
     }
-  }, [phase, currentPlayer, dice])
+  }, [phase, currentPlayer, dice, remainingMoves, rolls, getLegalMoves])
 
   React.useEffect(() => {
     if (remainingMoves.length < 1) return
@@ -87,20 +108,53 @@ const GameScreen = ({ onEndGame }) => {
     }
   }, [remainingMoves, legal])
 
-  const determineStarter = () => {
-    if (whiteRoll === 0 || blackRoll === 0) return null
-    if (whiteRoll > blackRoll) return WHITE
-    if (blackRoll > whiteRoll) return BLACK
+  const findDestination = (dropX, dropY) => {
+    const isTop = dropY < topHalf
+    const matches = validDestinations.filter(dest => isTop === dest < 13)
 
-    return null  // tie
+    for (const dest of matches) {
+      const x = places[dest]
+      if (x === undefined) continue
+
+      const leftBound = x - 15
+      const rightBound = x + 55
+
+      if (dropX >= leftBound && dropX <= rightBound) {
+        return dest
+      }
+    }
+
+    console.log('no match')
+    return null  // stub for now
   }
 
-  const ExitButton = () => (
-    <Pressable style={[styles.button, CS.row, CS.gap]} onPress={onEndGame}>
-      <Text style={CS.buttonText}>Exit</Text>
-      <MaterialIcon name="exit-to-app" size={20} color={COLOURS.white} />
-    </Pressable>
-  )
+  const handleDragEnd = () => {
+    setDragging(null)
+    setValidDestinations([])
+  }
+
+  const handleDragStart = (from) => {
+    setDragging(from)
+    const destinations = legal
+      .filter(m => m.from === from)
+      .map(m => getDestination(from, m.roll, currentPlayer))
+    setValidDestinations(destinations)
+  }
+
+  const handleDrop = (from, absoluteX, absoluteY) => {
+    const destPoint = findDestination(absoluteX, absoluteY)
+    if (!destPoint) return
+
+    const validMove = legal.find(m =>
+      m.from === from &&
+      getDestination(from, m.roll, currentPlayer) === destPoint
+    )
+
+    if (validMove) {
+      applyMove(from, validMove.roll, currentPlayer)
+      executeMove(validMove.roll)
+    }
+  }
 
   const isOpening = () => phase === PHASE.OPENING;
 
@@ -125,7 +179,7 @@ const GameScreen = ({ onEndGame }) => {
     const inverted = currentPlayer === BLACK
     let content = !resolving
       ?
-      <RollButton onPress={() => roll(currentPlayer)} />
+      <RollButton currentPlayer={currentPlayer} onPress={() => roll(currentPlayer)} />
       :
       <>
         <AnimatedDice color={currentPlayer} />
@@ -134,16 +188,19 @@ const GameScreen = ({ onEndGame }) => {
 
     if (dice.length > 0) {
       if (dice[0] === dice[1]) {
+        const usedCount = 4 - remainingMoves.length
         content = <>
-          <Dice value={dice[0]} inverted={inverted} />
-          <Dice value={dice[0]} inverted={inverted} />
-          <Dice value={dice[0]} inverted={inverted} />
-          <Dice value={dice[0]} inverted={inverted} />
+          <Dice value={dice[0]} inverted={inverted} used={usedCount > 0} />
+          <Dice value={dice[0]} inverted={inverted} used={usedCount > 1} />
+          <Dice value={dice[0]} inverted={inverted} used={usedCount > 2} />
+          <Dice value={dice[0]} inverted={inverted} used={usedCount > 3} />
         </>
       } else {
+        const usedDice = dice.filter(d => !remainingMoves.includes(d))
+        console.log(usedDice)
         content = <>
-          <Dice value={dice[0]} inverted={inverted} />
-          <Dice value={dice[1]} inverted={inverted} />
+          <Dice value={dice[0]} inverted={inverted} used={usedDice.includes(dice[0])} />
+          <Dice value={dice[1]} inverted={inverted} used={usedDice.includes(dice[1])} />
         </>
       }
     }
@@ -154,7 +211,7 @@ const GameScreen = ({ onEndGame }) => {
 
         <View style={[CS.row, CS.gap]}>{content}</View>
 
-        <ExitButton />
+        <ExitButton onEndGame={onEndGame} />
       </View>
     )
   }
@@ -190,7 +247,7 @@ const GameScreen = ({ onEndGame }) => {
           )}
         </View>
       </View>
-      <ExitButton />
+      <ExitButton onEndGame={onEndGame} />
     </View>
   )
 
@@ -208,23 +265,50 @@ const GameScreen = ({ onEndGame }) => {
           points.map((point, idx) => {
             const fill = idx % 2 === 0 ? COLOURS.beige : COLOURS.darkGrey
             const position = ascending ? start + idx : start - idx
-            const canMove = validFrom.includes(position)
+            const canMoveFrom = validFrom.includes(position)
+            const canMoveTo = validDestinations.includes(position)
 
             return (
-              <View key={idx}>
+              <View
+                key={idx}
+                ref={(viewRef) => {
+                  if (viewRef && !places[position]) {
+                    setTimeout(() => {
+                      viewRef.measure((x, y, width, height, pageX) => {
+                        setPlaces(prev => ({ ...prev, [position]: pageX }))
+                      })
+                    }, 0)
+                  }
+                }}
+              >
                 <View style={{ transform: [{ rotate: `${rotation}deg` }] }}>
-                  <Triangle fill={fill} highlight={canMove} />
+                  <Triangle fill={fill} source={canMoveFrom && !dragging} dest={canMoveTo} />
                 </View>
                 
                 {
                   point.count > 0 && (
-                    <View style={[styles.tile, rotation === 180 ? { top: 0 } : { bottom: 0 }]}>
+                    <View style={[styles.tile, rotation === 180 ? CS.top : CS.bottom]}>
                       {
-                        Array(point.count).fill().map((_, i) => (
+                      Array(point.count).fill().map((_, i) => {
+                        const isTopPiece = rotation === 180 ? i === point.count - 1 : i === 0
+                        
+                        if (isTopPiece && canMoveFrom) {
+                          return <DraggablePiece
+                            key={i}
+                            color={point.color}
+                            from={position}
+                            onDragStart={handleDragStart}
+                            onDragEnd={handleDragEnd}
+                            onDrop={handleDrop}
+                          />
+                        }
+                        
+                        return (
                           <View key={i}>
                             <Piece color={point.color} />
                           </View>
-                        ))
+                        )
+                      })
                       }
                     </View>
                   )
@@ -254,45 +338,6 @@ const GameScreen = ({ onEndGame }) => {
     }, 840)
   }
 
-  const RollButton = ({ player = null, onPress }) => {
-    const isWhite = player === WHITE
-    const bg = !player ? CS.bgBlue : CS.bgBlack
-    const font = !currentPlayer ? null : CS.buttonTextRegular
-
-    return (
-      <Pressable style={[CS.button, CS.align, CS.row,, CS.gap, isWhite ? CS.bgWhite : bg]} onPress={onPress}>
-        <Text style={[CS.buttonText, font, isWhite && CS.buttonTextDark]}>Roll</Text>
-        {
-          !currentPlayer
-            ? null
-            : <FAIcon name="dice" size={20} color={isWhite ? COLOURS.black : COLOURS.white} />
-        }
-      </Pressable>
-    )
-  }
-
-  const Triangle = ({ fill, highlight = false, width = 40, height = 120 }) => {
-    const points = `0,${height} ${width / 2},0 ${width},${height}`
-
-    return (
-      <Svg width={width} height={height}>
-        <Polygon points={points} fill={fill} />
-        {highlight && (
-          <Line
-            x1="0"
-            y1={height}
-            x2={width}
-            y2={height}
-            stroke={COLOURS.green}
-            strokeWidth="6"
-          />
-        )}
-      </Svg>
-    )
-  }
-
-  resetBoard()
-
   return (
     <View style={[styles.container, isOpening() ? CS.bgBlue : null]}>
       {
@@ -302,8 +347,10 @@ const GameScreen = ({ onEndGame }) => {
         :
         <View style={styles.board}>
           {renderControls()}
-          {renderBoard()}
-          {renderGutter()}
+          <>
+            {renderBoard()}
+            {renderGutter()}
+          </>
         </View>
       }
     </View>
