@@ -21,7 +21,6 @@ export const PHASE = {
 }
 export const MSG = {
   START: '{player} has the higher roll and will start.',
-  CAN_ROLL: '{player} can roll.',
   DOUBLE: '{player} has rolled a double!',
   MOVES_REMAINING: '{player} has {count} {move} remaining.',
   NO_LEGAL_MOVES: '{player} has no legal moves - switching to {nextPlayer}',

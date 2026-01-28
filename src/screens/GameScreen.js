@@ -80,10 +80,17 @@ const GameScreen = ({ onEndGame }) => {
       setLegal(available)
 
       if (!available.length) {
-        setMessage(formatMsg(MSG.NO_LEGAL_MOVES, {
-          player: ucFirst(currentPlayer),
-          nextPlayer: ucFirst(getOpponent(currentPlayer))
-        }))
+        if (remainingMoves.length < dice.length) {
+          switchPlayer()
+        } else {
+          setMessage(formatMsg(MSG.NO_LEGAL_MOVES, {
+            player: ucFirst(currentPlayer),
+            nextPlayer: ucFirst(getOpponent(currentPlayer))
+          }))
+          setTimeout(() => {
+            switchPlayer()
+          }, 2000)
+        }
         return
       }
 
@@ -93,20 +100,8 @@ const GameScreen = ({ onEndGame }) => {
       }
     } else {
       setLegal([])
-      if (rolls > 1) {
-        // Ready to roll
-        setMessage(formatMsg(MSG.CAN_ROLL, { player: ucFirst(currentPlayer) }))
-      }
     }
-  }, [phase, currentPlayer, dice, remainingMoves, rolls, getLegalMoves])
-
-  React.useEffect(() => {
-    if (remainingMoves.length < 1) return
-
-    if (legal.length > 0) {
-      console.log("remainingMoves", remainingMoves, "legal moves", legal)
-    }
-  }, [remainingMoves, legal])
+  }, [phase, currentPlayer, dice, remainingMoves, rolls, getLegalMoves, switchPlayer])
 
   const findDestination = (dropX, dropY) => {
     const isTop = dropY < topHalf
@@ -135,7 +130,17 @@ const GameScreen = ({ onEndGame }) => {
 
   const handleDragStart = (from) => {
     setDragging(from)
-    const destinations = legal
+
+    // Augment legal with combinations
+    const legalMoves = [...legal]
+    for (let i = 2; i <= remainingMoves.length; i++) {
+      const sum = remainingMoves.slice(0, i).reduce((acc, val) => acc + val, 0)
+      const comboMoves = getLegalMoves(currentPlayer, [sum])
+      legalMoves.push(...comboMoves)
+    }
+
+    setLegal(legalMoves)
+    const destinations = legalMoves
       .filter(m => m.from === from)
       .map(m => getDestination(from, m.roll, currentPlayer))
     setValidDestinations(destinations)

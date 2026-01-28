@@ -83,9 +83,20 @@ export const useGameStore = create((set, get) => {
         .some((p, i) => !HOME[player].includes(i))
     },
 
-    executeMove: (roll) => set((state) => ({
-      remainingMoves: state.remainingMoves.filter((_, i) => i !== state.remainingMoves.indexOf(roll))
-    })),
+    executeMove: (move) => set((state) => {
+      const moves = [...state.remainingMoves]
+      if (moves.includes(move)) {
+        return {
+          remainingMoves: moves.filter((_, i) => i !== moves.indexOf(move))
+        }
+      }
+
+      if (state.dice.length === 2) {
+        return { remainingMoves: [] }
+      }
+      
+      return { remainingMoves: moves.slice(move / moves[0]) }
+    }),
 
     getLegalMoves: (player, remainingMoves) => {
       const { board, bar } = get()
@@ -113,7 +124,9 @@ export const useGameStore = create((set, get) => {
 
     switchPlayer: () => set((state) => ({
       currentPlayer: state.currentPlayer === WHITE ? BLACK : WHITE,
-      rolls: state.rolls + 1
+      dice: [],
+      remainingMoves: [],
+      rolls: state.rolls + 1,
     })),
 
     startGame: (startingPlayer) => set({

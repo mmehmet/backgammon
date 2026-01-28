@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 16,
+    padding: 16,
   },
   gutter: { width: 40, gap: 1 },
   cubeFrame: { maxHeight: 40 },
