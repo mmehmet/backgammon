@@ -13,6 +13,15 @@ const initialBoard = () => {
 }
 
 export const useGameStore = create((set, get) => {
+  const canBearOff = (player) => {
+    const { board, bar } = get()
+    if (bar[player] > 0) return false
+
+    return !board
+      .filter(obj => obj.color === player)
+      .some((p, i) => !HOME[player].includes(i))
+  }
+
   const isLegalMove = (from, roll, player) => {
     const { board, bar } = get()
 
@@ -22,11 +31,7 @@ export const useGameStore = create((set, get) => {
 
     const dest = getDestination(from, roll, player)
     if (dest < 1 || dest > 24) {
-      const piecesOutside = player === WHITE
-        ? board.slice(19, from).some(point => point?.color === player)
-        : board.slice(from + 1, 7).some(point => point?.color === player)
-
-      return !piecesOutside
+      return canBearOff(player)
     }
 
     const destPoint = board[dest]
@@ -44,43 +49,41 @@ export const useGameStore = create((set, get) => {
     phase: PHASE.OPENING,
     rolls: 0,
 
-    applyMove: (from, roll, player) => set((state) => {
-      const newBoard = [...state.board]
-      const newBar = { ...state.bar }
-      const newBearOff = { ...state.bearOff }
+    applyMove: (from, roll, player) => {
+      let hitOccurred = false
 
-      if (!from) {
-        newBar[player]--
-      } else {
-        newBoard[from] = { ...newBoard[from], count: newBoard[from].count - 1 }
-        if (newBoard[from].count < 1) {
-          newBoard[from] = { ...newBoard[from], color: null }
+      set((state) => {
+        const newBoard = [...state.board]
+        const newBar = { ...state.bar }
+        const newBearOff = { ...state.bearOff }
+
+        if (!from) {
+          newBar[player]--
+        } else {
+          newBoard[from] = { ...newBoard[from], count: newBoard[from].count - 1 }
+          if (newBoard[from].count < 1) {
+            newBoard[from] = { ...newBoard[from], color: null }
+          }
         }
-      }
 
-      const dest = getDestination(from, roll, player)
-      if (dest < 1 || dest > 24) {
-        newBearOff[player]++
+        const dest = getDestination(from, roll, player)
+        if (dest < 1 || dest > 24) {
+          newBearOff[player]++
+          return { board: newBoard, bar: newBar, bearOff: newBearOff }
+        }
+
+        const opponent = getOpponent(player)
+        const hit = newBoard[dest].color === opponent
+        hitOccurred = hit
+        newBoard[dest] = { color: player, count: hit ? 1 : newBoard[dest].count + 1 }
+        if (hit) {
+          newBar[opponent]++
+        }
+
         return { board: newBoard, bar: newBar, bearOff: newBearOff }
-      }
+      })
 
-      const opponent = getOpponent(player)
-      const hit = newBoard[dest].color === opponent
-      newBoard[dest] = { color: player, count: hit ? 1 : newBoard[dest].count + 1 }
-      if (hit) {
-        newBar[opponent]++
-      }
-
-      return { board: newBoard, bar: newBar, bearOff: newBearOff }
-    }),
-
-    canBearOff: (player) => {
-      const { board, bar } = get()
-      if (bar[player] > 0) return false
-
-      return !board
-        .filter(obj => obj.color === player)
-        .some((p, i) => !HOME[player].includes(i))
+      return hitOccurred
     },
 
     executeMove: (move) => set((state) => {
@@ -104,12 +107,36 @@ export const useGameStore = create((set, get) => {
       const positions = bar[player] > 0 ? [0] : board
       const uniqueRolls = [...new Set(remainingMoves)]
 
+      // Single-die moves
       positions.forEach((p, i) => {
         if (i === 0 || p?.color === player) {
           for (const roll of uniqueRolls) {
             if (isLegalMove(i, roll, player)) {
               moves.push({ roll, from: i })
             }
+          }
+        }
+      })
+
+      // Combo moves
+      const validFromPositions = [...new Set(moves.map(m => m.from))]
+      validFromPositions.forEach(from => {
+        for (let i = 2; i <= remainingMoves.length; i++) {
+          const sequence = remainingMoves.slice(0, i)
+          const sum = sequence.reduce((acc, val) => acc + val, 0)
+
+          let currentPos = from
+          let valid = true
+          for (const step of sequence) {
+            if (!isLegalMove(currentPos, step, player)) {
+              valid = false
+              break
+            }
+            currentPos = getDestination(currentPos, step, player)
+          }
+
+          if (valid) {
+            moves.push({ roll: sum, from })
           }
         }
       })

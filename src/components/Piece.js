@@ -2,7 +2,9 @@ import { Svg, Circle, Defs, RadialGradient, Stop } from 'react-native-svg'
 import { COLOURS } from '../utils/colours'
 import { WHITE } from '../utils/constants'
 
-export const Piece = ({ color, size = 28 }) => {
+export const diameter = 28
+
+export const Piece = ({ color }) => {
     const isWhite = color === WHITE
     const gradientId = `grad-${color}`
 
@@ -13,7 +15,7 @@ export const Piece = ({ color, size = 28 }) => {
     const borderColor = isWhite ? COLOURS.darkGrey : COLOURS.mediumGrey
 
     return (
-        <Svg width={size} height={size}>
+        <Svg width={diameter} height={diameter}>
             <Defs>
                 <RadialGradient
                     id={gradientId}
@@ -29,17 +31,17 @@ export const Piece = ({ color, size = 28 }) => {
 
             {/* Main piece with gradient */}
             <Circle
-                cx={size / 2}
-                cy={size / 2}
-                r={size / 2 - 2}
+                cx={diameter / 2}
+                cy={diameter / 2}
+                r={diameter / 2 - 2}
                 fill={`url(#${gradientId})`}
             />
 
             {/* Bevel */}
             <Circle
-                cx={size / 2}
-                cy={size / 2}
-                r={size / 2 - 7}
+                cx={diameter / 2}
+                cy={diameter / 2}
+                r={diameter / 2 - 7}
                 stroke={COLOURS.disabled}
                 strokeWidth={0.7}
                 fill="none"
@@ -48,9 +50,9 @@ export const Piece = ({ color, size = 28 }) => {
 
             {/* Border */}
             <Circle
-                cx={size / 2}
-                cy={size / 2}
-                r={size / 2 - 1.5}
+                cx={diameter / 2}
+                cy={diameter / 2}
+                r={diameter / 2 - 1.5}
                 stroke={borderColor}
                 strokeWidth={1.5}
                 fill="none"

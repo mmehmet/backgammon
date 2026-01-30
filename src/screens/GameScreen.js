@@ -38,7 +38,6 @@ const GameScreen = ({ onEndGame }) => {
     rolls,
     resetBoard,
     applyMove,
-    canBearOff,
     executeMove,
     getLegalMoves,
     setDice,
@@ -58,7 +57,6 @@ const GameScreen = ({ onEndGame }) => {
     if (whiteRoll > 0 && blackRoll > 0) {
       const starter = determineStarter()
       if (starter) {
-        console.log(starter)
         setMessage(formatMsg(MSG.START, { player: ucFirst(starter) }))
         startGame(starter)
       } else {
@@ -74,13 +72,17 @@ const GameScreen = ({ onEndGame }) => {
   React.useEffect(() => {
     if (phase !== PHASE.PLAYING || !currentPlayer) return
 
+    if (dice.length === 0 && bar[currentPlayer] > 0) {
+      setMessage(formatMsg(MSG.ON_BAR, { player: ucFirst(currentPlayer) }))
+      return
+    }
+
     if (dice.length > 0) {
-      setMessage(MSG.EMPTY)
       const available = getLegalMoves(currentPlayer, remainingMoves)
       setLegal(available)
 
       if (!available.length) {
-        if (remainingMoves.length < dice.length) {
+        if (remainingMoves.length < dice.length && bar[currentPlayer] < 1) {
           switchPlayer()
         } else {
           setMessage(formatMsg(MSG.NO_LEGAL_MOVES, {
@@ -93,6 +95,8 @@ const GameScreen = ({ onEndGame }) => {
         }
         return
       }
+
+      setMessage(MSG.EMPTY)
 
       if (dice[0] === dice[1]) {
         // Just rolled a double
@@ -119,7 +123,6 @@ const GameScreen = ({ onEndGame }) => {
       }
     }
 
-    console.log('no match')
     return null  // stub for now
   }
 
@@ -129,18 +132,10 @@ const GameScreen = ({ onEndGame }) => {
   }
 
   const handleDragStart = (from) => {
+    console.log("legal", legal)
     setDragging(from)
 
-    // Augment legal with combinations
-    const legalMoves = [...legal]
-    for (let i = 2; i <= remainingMoves.length; i++) {
-      const sum = remainingMoves.slice(0, i).reduce((acc, val) => acc + val, 0)
-      const comboMoves = getLegalMoves(currentPlayer, [sum])
-      legalMoves.push(...comboMoves)
-    }
-
-    setLegal(legalMoves)
-    const destinations = legalMoves
+    const destinations = legal
       .filter(m => m.from === from)
       .map(m => getDestination(from, m.roll, currentPlayer))
     setValidDestinations(destinations)
@@ -156,12 +151,56 @@ const GameScreen = ({ onEndGame }) => {
     )
 
     if (validMove) {
-      applyMove(from, validMove.roll, currentPlayer)
+      const wasHit = applyMove(from, validMove.roll, currentPlayer)
+      if (wasHit) {
+        console.log('HIT!')
+        // Add hit sound/visual feedback here
+      }
       executeMove(validMove.roll)
     }
   }
 
-  const isOpening = () => phase === PHASE.OPENING;
+  const isOpening = () => phase === PHASE.OPENING
+
+  const renderBar = () => {
+    const blackPieces = Array(bar[BLACK]).fill(BLACK)
+    const whitePieces = Array(bar[WHITE]).fill(WHITE)
+    const allPieces = [...blackPieces, ...whitePieces]
+
+    if (allPieces.length === 0) return null
+
+    const canMoveFromBar = legal.some(m => m.from === 0)
+
+    return (
+      <View style={styles.barOverlay}>
+        <View style={styles.barPieces}>
+          {allPieces.map((color, i) => {
+            const isCurrentPlayer = color === currentPlayer
+            const isTopBlack = color === BLACK && i === 0
+            const isTopWhite = color === WHITE && i === bar[BLACK]
+            const isTopOfColor = isTopBlack || isTopWhite
+            const canMove = isTopOfColor && isCurrentPlayer && canMoveFromBar
+
+            if (canMove) {
+              return (
+                <View key={i} style={styles.barPieceHighlight}>
+                  <DraggablePiece
+                    color={color}
+                    from={0}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
+                    onDrop={handleDrop}
+                  />
+                </View>
+              )
+            }
+
+            return <Piece key={i} color={color} />
+          })}
+        </View>
+      </View>
+    )
+  }
 
   const renderBoard = () => (
     <View>
@@ -170,6 +209,7 @@ const GameScreen = ({ onEndGame }) => {
           <View style={styles.frameTop}>{renderPoints(12, 7)}</View>
           <View style={styles.frameBottom}>{renderPoints(13, 18)}</View>
         </View>
+        {renderBar()}
         <View style={[styles.frame, styles.flex]}>
           <View style={styles.frameTop}>{renderPoints(6, 1)}</View>
           <View style={styles.frameBottom}>{renderPoints(19, 24)}</View>
@@ -202,7 +242,6 @@ const GameScreen = ({ onEndGame }) => {
         </>
       } else {
         const usedDice = dice.filter(d => !remainingMoves.includes(d))
-        console.log(usedDice)
         content = <>
           <Dice value={dice[0]} inverted={inverted} used={usedDice.includes(dice[0])} />
           <Dice value={dice[1]} inverted={inverted} used={usedDice.includes(dice[1])} />

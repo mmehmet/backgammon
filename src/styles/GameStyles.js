@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native'
 import { COLOURS } from '../utils/colours'
+import { diameter } from '../components/Piece'
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLOURS.black, padding: 16 },
@@ -38,6 +39,17 @@ const styles = StyleSheet.create({
   message: { fontSize: 14, color: COLOURS.lightGrey, lineHeight: 18 },
   tile: { position: 'absolute', width: '100%', alignItems: 'center' },
   rollSection: { padding: 8, flex: 1, alignItems: 'center', justifyContent: "center" },
+  barOverlay: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: '50%',
+    width: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  barPieces: { alignItems: "center", gap: -10 },
 })
 
 export default styles

@@ -20,6 +20,7 @@ export const PHASE = {
   FINISHED: 'FINISHED'
 }
 export const MSG = {
+  ON_BAR: '{player} is on the bar',
   START: '{player} has the higher roll and will start.',
   DOUBLE: '{player} has rolled a double!',
   MOVES_REMAINING: '{player} has {count} {move} remaining.',
