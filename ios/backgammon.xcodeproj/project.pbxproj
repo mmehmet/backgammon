@@ -12,6 +12,9 @@
 		2F703AEBAF114ECE8DB42FF7 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		E0C38EA52F2C45D500A87385 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E0C38EA42F2C45D500A87385 /* AVFoundation.framework */; };
+		E0C38EA72F2C45E000A87385 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E0C38EA62F2C45E000A87385 /* AudioToolbox.framework */; };
+		E0C38EA92F2C480A00A87385 /* dice_roll.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = E0C38EA82F2C480A00A87385 /* dice_roll.mp3 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +27,9 @@
 		5DCACB8F33CDC322A6C60F78 /* libPods-backgammon.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-backgammon.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = backgammon/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = backgammon/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		E0C38EA42F2C45D500A87385 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		E0C38EA62F2C45E000A87385 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		E0C38EA82F2C480A00A87385 /* dice_roll.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = dice_roll.mp3; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -32,6 +38,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E0C38EA72F2C45E000A87385 /* AudioToolbox.framework in Frameworks */,
+				E0C38EA52F2C45D500A87385 /* AVFoundation.framework in Frameworks */,
 				0C80B921A6F3F58F76C31292 /* libPods-backgammon.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -54,6 +62,8 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E0C38EA62F2C45E000A87385 /* AudioToolbox.framework */,
+				E0C38EA42F2C45D500A87385 /* AVFoundation.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				5DCACB8F33CDC322A6C60F78 /* libPods-backgammon.a */,
 			);
@@ -70,6 +80,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				E0C38EA82F2C480A00A87385 /* dice_roll.mp3 */,
 				13B07FAE1A68108700A75B9A /* backgammon */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
@@ -158,6 +169,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E0C38EA92F2C480A00A87385 /* dice_roll.mp3 in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				2F703AEBAF114ECE8DB42FF7 /* PrivacyInfo.xcprivacy in Resources */,
@@ -191,9 +203,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-backgammon/Pods-backgammon-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-backgammon/Pods-backgammon-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -230,9 +246,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-backgammon/Pods-backgammon-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-backgammon/Pods-backgammon-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
