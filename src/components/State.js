@@ -1,7 +1,8 @@
 import { create } from 'zustand'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import { getDestination, getOpponent } from "./Logic"
-import { PHASE, WHITE, BLACK, STARTING_POSITIONS, HOME } from '../utils/constants'
+import { PHASE, WHITE, BLACK, STARTING_POSITIONS, HOME, STORAGE_KEY } from '../utils/constants'
 
 const initialBoard = () => {
   const board = []
@@ -17,9 +18,7 @@ export const useGameStore = create((set, get) => {
     const { board, bar } = get()
     if (bar[player] > 0) return false
 
-    return !board
-      .filter(obj => obj && obj.color === player)
-      .some((p, i) => !HOME[player].includes(i))
+    return !board.some((p, i) => p?.color === player && !HOME[player].includes(i))
   }
 
   const isLegalMove = (from, roll, player) => {
@@ -32,17 +31,15 @@ export const useGameStore = create((set, get) => {
     const dest = getDestination(from, roll, player)
     // Bearing off
     if (dest < 1 || dest > 24) {
-      console.log("BEAR OFF")
       if (!canBearOff(player)) return false
 
       // Check if exact bear-off or furthest back piece
-      const exactBearOff = (player === WHITE && dest === 25) ||
-        (player === BLACK && dest === 0)
-      if (exactBearOff) return true
+      if (player === WHITE && dest === 25) return true
+      if (player === BLACK && dest === 0) return true
 
       // For overshooting, piece must be furthest back
       const homePieces = board
-        .map((p, i) => p.color === player ? i : null)
+        .map((p, i) => p?.color === player ? i : null)
         .filter(i => i !== null && HOME[player].includes(i))
 
       const furthestBack = player === WHITE
@@ -83,7 +80,6 @@ export const useGameStore = create((set, get) => {
     dice: [],
     remainingMoves: [],
     phase: PHASE.OPENING,
-    rolls: 0,
 
     applyMove: (from, roll, player) => {
       let hitOccurred = false
@@ -173,17 +169,18 @@ export const useGameStore = create((set, get) => {
       remainingMoves: die1 === die2 ? [die1, die1, die1, die2] : [die1, die2]
     }),
 
-    switchPlayer: () => set((state) => ({
-      currentPlayer: state.currentPlayer === WHITE ? BLACK : WHITE,
-      dice: [],
-      remainingMoves: [],
-      rolls: state.rolls + 1,
-    })),
+    switchPlayer: async () => {
+      await get().saveGame()
+      set((state) => ({
+        currentPlayer: state.currentPlayer === WHITE ? BLACK : WHITE,
+        dice: [],
+        remainingMoves: [],
+      }))
+    },
 
     startGame: (startingPlayer) => set({
       currentPlayer: startingPlayer,
       phase: PHASE.PLAYING,
-      rolls: 0,
     }),
 
     resetBoard: () => set({
@@ -197,7 +194,50 @@ export const useGameStore = create((set, get) => {
       dice: [],
       remainingMoves: [],
       phase: PHASE.OPENING,
-      rolls: 0,
-    })
+    }),
+
+    hasSavedGame: async () => {
+      try {
+        const data = await AsyncStorage.getItem(STORAGE_KEY)
+        return data !== null
+      } catch {
+        return false
+      }
+    },
+
+    restoreGame: async () => {
+      try {
+        const savedData = await AsyncStorage.getItem(STORAGE_KEY)
+        if (savedData) {
+          set(JSON.parse(savedData))
+          return true
+        }
+      } catch (error) {
+        console.error('Restore failed:', error)
+      }
+
+      return false
+    },
+
+    saveGame: async () => {
+      try {
+        const state = get()
+        const saveData = {
+          board: state.board,
+          bar: state.bar,
+          bearOff: state.bearOff,
+          currentPlayer: state.currentPlayer,
+          dice: state.dice,
+          remainingMoves: state.remainingMoves,
+          phase: state.phase,
+          rolls: state.rolls,
+        }
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(saveData))
+        return true
+      } catch (error) {
+        console.error('Save failed:', error)
+        return false
+      }
+    },
   }
 })

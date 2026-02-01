@@ -1,8 +1,8 @@
 export const WHITE = 'WHITE'
 export const BLACK = 'BLACK'
 export const HOME = {
-  [WHITE]: [1, 2, 3, 4, 5, 6],
-  [BLACK]: [24, 23, 22, 21, 20, 19]
+  [BLACK]: [1, 2, 3, 4, 5, 6],
+  [WHITE]: [24, 23, 22, 21, 20, 19]
 }
 export const STARTING_POSITIONS = {
   1: { count: 2, color: WHITE },
@@ -28,3 +28,4 @@ export const MSG = {
   EMPTY: '',
   TIE: "It's a tie! Roll again...",
 }
+export const STORAGE_KEY = '@backgammon_game_state'

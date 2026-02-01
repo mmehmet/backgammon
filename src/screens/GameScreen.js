@@ -36,7 +36,6 @@ const GameScreen = ({ onEndGame }) => {
     dice,
     remainingMoves,
     phase,
-    rolls,
     resetBoard,
     applyMove,
     executeMove,
@@ -44,6 +43,7 @@ const GameScreen = ({ onEndGame }) => {
     setDice,
     switchPlayer,
     startGame,
+    saveGame,
   } = useGameStore()
 
   React.useEffect(() => {
@@ -106,13 +106,22 @@ const GameScreen = ({ onEndGame }) => {
     } else {
       setLegal([])
     }
-  }, [phase, currentPlayer, dice, remainingMoves, rolls, getLegalMoves, switchPlayer])
+  }, [phase, currentPlayer, dice, remainingMoves, getLegalMoves, switchPlayer])
+
+  React.useEffect(() => {
+    if (bearOff[currentPlayer] === 15) {
+      setMessage(`${ucFirst(currentPlayer)} wins!`)
+      console.log("GAME OVER")
+      // TODO: Handle end game
+    }
+  }, [bearOff])
 
   const findDestination = (dropX, dropY) => {
     // Check bear-off first
     const bx = places[0]
     if (bx !== undefined && dropX >= bx) {
-      return validDestinations.includes(25) ? 25 : 0
+      const bearOffDest = validDestinations.find(d => d < 1 || d > 24)
+      return bearOffDest !== undefined ? bearOffDest : null
     }
 
     const isTop = dropY < topHalf
@@ -166,6 +175,11 @@ const GameScreen = ({ onEndGame }) => {
     }
   }
 
+  const handleExit = async () => {
+    await saveGame()
+    onEndGame()
+  }
+
   const isOpening = () => phase === PHASE.OPENING
 
   const renderBar = () => {
@@ -209,18 +223,19 @@ const GameScreen = ({ onEndGame }) => {
   }
 
   const renderBearOff = () => {
-    const dest = validDestinations.includes(0) || validDestinations.includes(25) ? styles.highlight : null
+    const dest = validDestinations.some(d => d < 1 || d > 24) ? styles.highlight : null
 
     return (
       <View style={[styles.bearOffOverlay, dest]}>
         <View style={styles.bearOffPieces}>
-          {Array(bearOff[WHITE]).fill().map((_, i) => (
-            <SidePiece key={i} color={WHITE} />
-          ))}
-        </View>
-        <View style={styles.bearOffPieces}>
           {Array(bearOff[BLACK]).fill().map((_, i) => (
             <SidePiece key={i} color={BLACK} />
+          ))}
+        </View>
+
+        <View style={styles.bearOffPieces}>
+          {Array(bearOff[WHITE]).fill().map((_, i) => (
+            <SidePiece key={i} color={WHITE} />
           ))}
         </View>
       </View>
@@ -280,7 +295,7 @@ const GameScreen = ({ onEndGame }) => {
 
         <View style={[CS.row, CS.gap]}>{content}</View>
 
-        <ExitButton onEndGame={onEndGame} />
+        <ExitButton onEndGame={handleExit} />
       </View>
     )
   }
@@ -295,7 +310,6 @@ const GameScreen = ({ onEndGame }) => {
           setTimeout(() => {
             if (viewRef) {  // Check again inside setTimeout
               viewRef.measure((x, y, width, height, pageX) => {
-                console.debug("BEAR OFF X", pageX)
                 setPlaces(prev => ({
                   ...prev,
                   0: pageX,

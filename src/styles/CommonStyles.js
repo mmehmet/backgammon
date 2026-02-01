@@ -18,11 +18,13 @@ const CS = StyleSheet.create({
     backgroundColor: COLOURS.red,
     paddingHorizontal: 40,
     paddingVertical: 15,
-    borderRadius: 10
+    borderRadius: 10,
+    alignItems: "center"
   },
   bgBlack: { backgroundColor: COLOURS.black },
   bgBlue: { backgroundColor: COLOURS.darkBlue },
   bgWhite: { backgroundColor: COLOURS.offWhite },
+  bgGrey: { backgroundColor: COLOURS.disabled },
   buttonText: {
     color: COLOURS.white,
     fontSize: 24,
