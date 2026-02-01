@@ -18,25 +18,61 @@ export const useGameStore = create((set, get) => {
     if (bar[player] > 0) return false
 
     return !board
-      .filter(obj => obj.color === player)
+      .filter(obj => obj && obj.color === player)
       .some((p, i) => !HOME[player].includes(i))
   }
 
   const isLegalMove = (from, roll, player) => {
     const { board, bar } = get()
 
-    if (from && bar[player] > 0) {
+    if (from > 0 && bar[player] > 0) {
       return false
     }
 
     const dest = getDestination(from, roll, player)
+    // Bearing off
     if (dest < 1 || dest > 24) {
-      return canBearOff(player)
+      console.log("BEAR OFF")
+      if (!canBearOff(player)) return false
+
+      // Check if exact bear-off or furthest back piece
+      const exactBearOff = (player === WHITE && dest === 25) ||
+        (player === BLACK && dest === 0)
+      if (exactBearOff) return true
+
+      // For overshooting, piece must be furthest back
+      const homePieces = board
+        .map((p, i) => p.color === player ? i : null)
+        .filter(i => i !== null && HOME[player].includes(i))
+
+      const furthestBack = player === WHITE
+        ? Math.min(...homePieces)
+        : Math.max(...homePieces)
+
+      return from === furthestBack
     }
 
     const destPoint = board[dest]
 
     return !(destPoint.color === getOpponent(player) && destPoint.count > 1)
+  }
+
+  const getMoves = (available) => {
+    const moves = []
+    const len = available.length
+    if (len) {
+      moves.push([available[len - 1]])
+      for (let i = len; i > 0; i--) {
+        const move = available.slice(0, i)
+        moves.push(move)
+
+        if (i === 2 && available[0] !== available[1]) {
+          moves.push([available[1], available[0]])
+        }
+      }
+    }
+
+    return moves
   }
   
   return {
@@ -57,7 +93,7 @@ export const useGameStore = create((set, get) => {
         const newBar = { ...state.bar }
         const newBearOff = { ...state.bearOff }
 
-        if (!from) {
+        if (from < 0) {
           newBar[player]--
         } else {
           newBoard[from] = { ...newBoard[from], count: newBoard[from].count - 1 }
@@ -94,7 +130,7 @@ export const useGameStore = create((set, get) => {
         }
       }
 
-      if (state.dice.length === 2) {
+      if (state.dice.length === 2 && state.dice[0] !== state.dice[1]) {
         return { remainingMoves: [] }
       }
       
@@ -103,30 +139,18 @@ export const useGameStore = create((set, get) => {
 
     getLegalMoves: (player, remainingMoves) => {
       const { board, bar } = get()
+      const possible = getMoves(remainingMoves)
       const moves = []
-      const positions = bar[player] > 0 ? [0] : board
-      const uniqueRolls = [...new Set(remainingMoves)]
+      const positions = bar[player] > 0
+        ? [-1]
+        : board.map((p, i) => p?.color === player ? i : null).filter(i => i !== null)
 
-      // Single-die moves
-      positions.forEach((p, i) => {
-        if (i === 0 || p?.color === player) {
-          for (const roll of uniqueRolls) {
-            if (isLegalMove(i, roll, player)) {
-              moves.push({ roll, from: i })
-            }
-          }
-        }
-      })
-
-      // Combo moves
-      const validFromPositions = [...new Set(moves.map(m => m.from))]
-      validFromPositions.forEach(from => {
-        for (let i = 2; i <= remainingMoves.length; i++) {
-          const sequence = remainingMoves.slice(0, i)
+      positions.forEach(from => {
+        possible.forEach(sequence => {
           const sum = sequence.reduce((acc, val) => acc + val, 0)
-
           let currentPos = from
           let valid = true
+
           for (const step of sequence) {
             if (!isLegalMove(currentPos, step, player)) {
               valid = false
@@ -138,7 +162,7 @@ export const useGameStore = create((set, get) => {
           if (valid) {
             moves.push({ roll: sum, from })
           }
-        }
+        })
       })
 
       return moves

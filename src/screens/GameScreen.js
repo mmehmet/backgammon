@@ -8,8 +8,9 @@ import { ExitButton } from '../components/ExitButton'
 import { getOpponent, getDestination } from '../components/Logic'
 import { Piece } from '../components/Piece'
 import { RollButton } from "../components/RollButton"
+import { SidePiece } from '../components/SidePiece'
 import { useGameStore } from '../components/State'
-import { Triangle } from "../components/Triangle"
+import { Triangle } from '../components/Triangle'
 import CS from '../styles/CommonStyles'
 import styles from '../styles/GameStyles'
 import { COLOURS } from '../utils/colours'
@@ -108,6 +109,12 @@ const GameScreen = ({ onEndGame }) => {
   }, [phase, currentPlayer, dice, remainingMoves, rolls, getLegalMoves, switchPlayer])
 
   const findDestination = (dropX, dropY) => {
+    // Check bear-off first
+    const bx = places[0]
+    if (bx !== undefined && dropX >= bx) {
+      return validDestinations.includes(25) ? 25 : 0
+    }
+
     const isTop = dropY < topHalf
     const matches = validDestinations.filter(dest => isTop === dest < 13)
 
@@ -115,7 +122,7 @@ const GameScreen = ({ onEndGame }) => {
       const x = places[dest]
       if (x === undefined) continue
 
-      const leftBound = x - 15
+      const leftBound = x
       const rightBound = x + 55
 
       if (dropX >= leftBound && dropX <= rightBound) {
@@ -123,7 +130,7 @@ const GameScreen = ({ onEndGame }) => {
       }
     }
 
-    return null  // stub for now
+    return null
   }
 
   const handleDragEnd = () => {
@@ -132,7 +139,6 @@ const GameScreen = ({ onEndGame }) => {
   }
 
   const handleDragStart = (from) => {
-    console.log("legal", legal)
     setDragging(from)
 
     const destinations = legal
@@ -143,7 +149,7 @@ const GameScreen = ({ onEndGame }) => {
 
   const handleDrop = (from, absoluteX, absoluteY) => {
     const destPoint = findDestination(absoluteX, absoluteY)
-    if (!destPoint) return
+    if (destPoint === null) return
 
     const validMove = legal.find(m =>
       m.from === from &&
@@ -169,7 +175,7 @@ const GameScreen = ({ onEndGame }) => {
 
     if (allPieces.length === 0) return null
 
-    const canMoveFromBar = legal.some(m => m.from === 0)
+    const canMoveFromBar = legal.some(m => m.from < 0)
 
     return (
       <View style={styles.barOverlay}>
@@ -186,7 +192,7 @@ const GameScreen = ({ onEndGame }) => {
                 <View key={i} style={styles.barPieceHighlight}>
                   <DraggablePiece
                     color={color}
-                    from={0}
+                    from={-1}
                     onDragStart={handleDragStart}
                     onDragEnd={handleDragEnd}
                     onDrop={handleDrop}
@@ -197,6 +203,25 @@ const GameScreen = ({ onEndGame }) => {
 
             return <Piece key={i} color={color} />
           })}
+        </View>
+      </View>
+    )
+  }
+
+  const renderBearOff = () => {
+    const dest = validDestinations.includes(0) || validDestinations.includes(25) ? styles.highlight : null
+
+    return (
+      <View style={[styles.bearOffOverlay, dest]}>
+        <View style={styles.bearOffPieces}>
+          {Array(bearOff[WHITE]).fill().map((_, i) => (
+            <SidePiece key={i} color={WHITE} />
+          ))}
+        </View>
+        <View style={styles.bearOffPieces}>
+          {Array(bearOff[BLACK]).fill().map((_, i) => (
+            <SidePiece key={i} color={BLACK} />
+          ))}
         </View>
       </View>
     )
@@ -261,10 +286,31 @@ const GameScreen = ({ onEndGame }) => {
   }
 
   const renderGutter = () => (
-    <View style={styles.gutter}>
+    <View
+      style={styles.gutter}
+      ref={(viewRef) => {
+        if (places[0]) return
+
+        if (viewRef) {
+          setTimeout(() => {
+            if (viewRef) {  // Check again inside setTimeout
+              viewRef.measure((x, y, width, height, pageX) => {
+                console.debug("BEAR OFF X", pageX)
+                setPlaces(prev => ({
+                  ...prev,
+                  0: pageX,
+                  25: pageX
+                }))
+              })
+            }
+          }, 2)
+        }
+      }}
+    >
         <View style={[styles.frame, styles.sideFrame]} />
         <View style={[styles.frame, styles.sideFrame, styles.cubeFrame]} />
         <View style={[styles.frame, styles.sideFrame]} />
+        {renderBearOff()}
       </View>
   )
 
@@ -311,17 +357,24 @@ const GameScreen = ({ onEndGame }) => {
             const position = ascending ? start + idx : start - idx
             const canMoveFrom = validFrom.includes(position)
             const canMoveTo = validDestinations.includes(position)
+            const stacked = [styles.tile]
+            const extra = Math.max(point.count - 5, 0)
+            if (extra) {
+              stacked.push(rotation === 180 ? { marginBottom: -2 * extra } : { marginTop: -2 * extra })
+            }
 
             return (
               <View
                 key={idx}
                 ref={(viewRef) => {
-                  if (viewRef && !places[position]) {
+                  if (places[position]) return
+
+                  if (viewRef) {
                     setTimeout(() => {
                       viewRef.measure((x, y, width, height, pageX) => {
                         setPlaces(prev => ({ ...prev, [position]: pageX }))
                       })
-                    }, 0)
+                    }, 2)
                   }
                 }}
               >
@@ -331,7 +384,7 @@ const GameScreen = ({ onEndGame }) => {
                 
                 {
                   point.count > 0 && (
-                    <View style={[styles.tile, rotation === 180 ? CS.top : CS.bottom]}>
+                    <View style={[styles.tiles, rotation === 180 ? CS.top : CS.bottom]}>
                       {
                       Array(point.count).fill().map((_, i) => {
                         const isTopPiece = rotation === 180 ? i === point.count - 1 : i === 0
@@ -348,7 +401,7 @@ const GameScreen = ({ onEndGame }) => {
                         }
                         
                         return (
-                          <View key={i}>
+                          <View key={i} style={stacked}>
                             <Piece color={point.color} />
                           </View>
                         )

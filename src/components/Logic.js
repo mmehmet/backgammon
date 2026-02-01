@@ -1,7 +1,7 @@
 import { WHITE, BLACK } from "../utils/constants"
 
 export const getDestination = (from, roll, player) => {
-  if (!from) {
+  if (from < 0) {
     return player === WHITE ? roll : (25 - roll)
   }
 

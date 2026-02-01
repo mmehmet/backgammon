@@ -1,19 +1,24 @@
 export const COLOURS = {
-  darkBlue: '#2c3e50',
-  sienna: '#A0522D',
-  darkBrown: '#503e2e',
+  red: '#e74c3c',
+
+  green: '#8efa11',
+
+  yellow: '#ff5',
   beige: '#DEB887',
+  sienna: '#A0522D',
   mediumBrown: '#8B7355',
+  darkBrown: '#503e2e',
+
+  blue: '#33cafe',
+  darkBlue: '#2c3e50',
+
   white: '#FFFFFF',
+  offWhite: '#fafafa',
+  lightGrey: '#ecf0f1',
+  disabled: '#ccc',
+  grey: '#aaa',
   mediumGrey: '#666',
   darkGrey: '#3E3E3E',
-  lightGrey: '#ecf0f1',
-  red: '#e74c3c',
+  offBlack: '#222',
   black: '#000',
-  offWhite: '#fafafa',
-  offBlack: '#111',
-  disabled: '#ccc',
-  green: '#8efa11',
-  blue: '#33cafe',
-  yellow: '#ff5',
 }

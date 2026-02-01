@@ -2,6 +2,8 @@ import { StyleSheet } from 'react-native'
 import { COLOURS } from '../utils/colours'
 import { diameter } from '../components/Piece'
 
+const gutterWdith = diameter + 16 + 2 // two 8px borders and a 1px padding
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLOURS.black, padding: 16 },
   board: {
@@ -17,8 +19,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 16,
   },
-  gutter: { width: 40, gap: 1 },
-  cubeFrame: { maxHeight: 40 },
+  gutter: { width: gutterWdith, gap: 1 },
+  cubeFrame: { maxHeight: gutterWdith },
   frame: {
     borderWidth: 14,
     borderColor: COLOURS.mediumBrown,
@@ -37,7 +39,8 @@ const styles = StyleSheet.create({
   buttonRed: { borderWidth: 0, backgroundColor: COLOURS.red },
   text: { fontSize: 18, color: COLOURS.lightGrey, lineHeight: 24 },
   message: { fontSize: 14, color: COLOURS.lightGrey, lineHeight: 18 },
-  tile: { position: 'absolute', width: '100%', alignItems: 'center' },
+  tiles: { position: 'absolute', width: '100%', alignItems: 'center' },
+  tile: { marginBottom: -1, marginTop: -1 },
   rollSection: { padding: 8, flex: 1, alignItems: 'center', justifyContent: "center" },
   barOverlay: {
     position: 'absolute',
@@ -49,7 +52,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 10,
   },
+  rollSection: { padding: 8, flex: 1, alignItems: 'center', justifyContent: "center" },
+  bearOffOverlay: {
+    position: 'absolute',
+    top: 9,
+    bottom: 9,
+    right: 9,
+    width: 1,
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    zIndex: 10,
+  },
   barPieces: { alignItems: "center", gap: -10 },
+  bearOffPieces: { gap: 1 },
+  highlight: { backgroundColor: COLOURS.green },
 })
 
 export default styles

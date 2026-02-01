@@ -29,7 +29,7 @@ const CS = StyleSheet.create({
     fontWeight: 'bold',
     lineHeight: 24,
   },
-  buttonTextDark: { color: COLOURS.offBlack },
+  buttonTextDark: { color: COLOURS.darkGrey },
   buttonTextRegular: { fontWeight: 400 },
 })
 
