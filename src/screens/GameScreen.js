@@ -1,5 +1,7 @@
 import React from 'react'
 import { View, Text, Dimensions } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import Orientation from 'react-native-orientation-locker'
 
 import { AnimatedDice } from '../components/AnimatedDice'
 import { Dice } from '../components/Dice'
@@ -14,10 +16,22 @@ import { Triangle } from '../components/Triangle'
 import CS from '../styles/CommonStyles'
 import styles from '../styles/GameStyles'
 import { COLOURS } from '../utils/colours'
-import { PHASE, BLACK, WHITE, MSG } from '../utils/constants'
+import {
+  LANDSCAPE_LEFT,
+  LANDSCAPE_RIGHT,
+  PHASE,
+  BLACK,
+  WHITE,
+  MSG,
+  BACKGAMMON,
+  GAMMON,
+} from '../utils/constants'
 import { getRoll, ucFirst, formatMsg } from '../utils/helpers'
+import { Scoreboard } from "../components/Scoreboard";
 
 const GameScreen = ({ onEndGame }) => {
+  const insets = useSafeAreaInsets()
+  const [orientation, setOrientation] = React.useState(LANDSCAPE_RIGHT)
   const [message, setMessage] = React.useState('')
   const [resolving, setResolving] = React.useState(null)
   const [whiteRoll, setWhiteRoll] = React.useState(0)
@@ -29,6 +43,7 @@ const GameScreen = ({ onEndGame }) => {
 
   const topHalf = Dimensions.get('window').height / 2
   const {
+    points,
     board,
     bar,
     bearOff,
@@ -44,7 +59,20 @@ const GameScreen = ({ onEndGame }) => {
     switchPlayer,
     startGame,
     saveGame,
+    updatePoints,
   } = useGameStore()
+  const safeArea = orientation === LANDSCAPE_LEFT
+    ? { paddingLeft: insets.left }
+    : { paddingRight: insets.right }
+
+  React.useEffect(() => {
+    Orientation.lockToLandscape()
+    const initial = Orientation.getInitialOrientation()
+    setOrientation(initial)
+
+    Orientation.addOrientationListener(setOrientation)
+    return () => Orientation.removeOrientationListener(setOrientation)
+  }, [])
 
   React.useEffect(() => {
     const determineStarter = () => {
@@ -73,6 +101,8 @@ const GameScreen = ({ onEndGame }) => {
   React.useEffect(() => {
     if (phase !== PHASE.PLAYING || !currentPlayer) return
 
+    if (bearOff[BLACK] === 15 || bearOff[WHITE] === 15) return
+
     if (dice.length === 0 && bar[currentPlayer] > 0) {
       setMessage(formatMsg(MSG.ON_BAR, { player: ucFirst(currentPlayer) }))
       return
@@ -84,14 +114,14 @@ const GameScreen = ({ onEndGame }) => {
 
       if (!available.length) {
         if (remainingMoves.length < dice.length && bar[currentPlayer] < 1) {
-          switchPlayer()
+          switchPlayer().then()
         } else {
           setMessage(formatMsg(MSG.NO_LEGAL_MOVES, {
             player: ucFirst(currentPlayer),
             nextPlayer: ucFirst(getOpponent(currentPlayer))
           }))
           setTimeout(() => {
-            switchPlayer()
+            switchPlayer().then()
           }, 2000)
         }
         return
@@ -106,15 +136,28 @@ const GameScreen = ({ onEndGame }) => {
     } else {
       setLegal([])
     }
-  }, [phase, currentPlayer, dice, remainingMoves, getLegalMoves, switchPlayer])
+  }, [phase, currentPlayer, dice, remainingMoves, getLegalMoves, switchPlayer, bearOff, bar])
 
   React.useEffect(() => {
     if (bearOff[currentPlayer] === 15) {
-      setMessage(`${ucFirst(currentPlayer)} wins!`)
       console.log("GAME OVER")
-      // TODO: Handle end game
+      let msg = `${ucFirst(currentPlayer)} wins!`
+      const earned = updatePoints(currentPlayer)
+      if (earned > 1) {
+        const label = earned > 2 ? BACKGAMMON : GAMMON
+        msg = `${msg} - ${label}!`
+      }
+      const updated = {
+        ...points,
+        [currentPlayer]: points[currentPlayer] + earned
+      }
+      setMessage(`${msg}\n[Black: ${updated[BLACK]} | White: ${updated[WHITE]}]`)
+      
+      setTimeout(() => {
+        resetBoard()
+      }, 2000)
     }
-  }, [bearOff])
+  }, [bearOff, currentPlayer])
 
   const findDestination = (dropX, dropY) => {
     // Check bear-off first
@@ -225,34 +268,28 @@ const GameScreen = ({ onEndGame }) => {
   const renderBearOff = () => {
     const dest = validDestinations.some(d => d < 1 || d > 24) ? styles.highlight : null
 
-    return (
-      <View style={[styles.bearOffOverlay, dest]}>
-        <View style={styles.bearOffPieces}>
-          {Array(bearOff[BLACK]).fill().map((_, i) => (
-            <SidePiece key={i} color={BLACK} />
-          ))}
-        </View>
-
-        <View style={styles.bearOffPieces}>
-          {Array(bearOff[WHITE]).fill().map((_, i) => (
-            <SidePiece key={i} color={WHITE} />
-          ))}
-        </View>
+    return <View style={[styles.bearOffOverlay, dest]}>
+      <View style={CS.gap1}>
+        {Array(bearOff[BLACK]).fill(null).map((_, i) => <SidePiece key={i} color={BLACK} />)}
       </View>
-    )
+
+      <View style={CS.gap1}>
+        {Array(bearOff[WHITE]).fill(null).map((_, i) => <SidePiece key={i} color={WHITE} />)}
+      </View>
+    </View>
   }
 
   const renderBoard = () => (
     <View>
       <View style={styles.board}>
         <View style={[styles.frame, styles.flex]}>
-          <View style={styles.frameTop}>{renderPoints(12, 7)}</View>
-          <View style={styles.frameBottom}>{renderPoints(13, 18)}</View>
+          <View style={styles.frameTop}>{renderPositions(12, 7)}</View>
+          <View style={styles.frameBottom}>{renderPositions(13, 18)}</View>
         </View>
         {renderBar()}
         <View style={[styles.frame, styles.flex]}>
-          <View style={styles.frameTop}>{renderPoints(6, 1)}</View>
-          <View style={styles.frameBottom}>{renderPoints(19, 24)}</View>
+          <View style={styles.frameTop}>{renderPositions(6, 1)}</View>
+          <View style={styles.frameBottom}>{renderPositions(19, 24)}</View>
         </View>
       </View>
     </View>
@@ -292,10 +329,11 @@ const GameScreen = ({ onEndGame }) => {
     return (
       <View style={styles.controls}>
         <Text style={styles.message}>{message}</Text>
-
         <View style={[CS.row, CS.gap]}>{content}</View>
-
-        <ExitButton onEndGame={handleExit} />
+        <View style={[CS.gap, CS.centre]}>
+          <Scoreboard points={points} red />
+          <ExitButton onEndGame={handleExit} />
+        </View>
       </View>
     )
   }
@@ -355,10 +393,10 @@ const GameScreen = ({ onEndGame }) => {
     </View>
   )
 
-  const renderPoints = (start, end) => {
+  const renderPositions = (start, end) => {
     const rotation = start < 13 ? 180 : 0
     const ascending = end > start
-    const points = ascending
+    const positions = ascending
      ? board.slice(start, end + 1)
      : board.slice(end, start + 1).reverse()
     const validFrom = [...new Set(legal.map(m => m.from))]
@@ -366,7 +404,7 @@ const GameScreen = ({ onEndGame }) => {
     return (
       <View style={[CS.row, CS.wrap]}>
         {
-          points.map((point, idx) => {
+          positions.map((point, idx) => {
             const fill = idx % 2 === 0 ? COLOURS.beige : COLOURS.darkGrey
             const position = ascending ? start + idx : start - idx
             const canMoveFrom = validFrom.includes(position)
@@ -400,7 +438,7 @@ const GameScreen = ({ onEndGame }) => {
                   point.count > 0 && (
                     <View style={[styles.tiles, rotation === 180 ? CS.top : CS.bottom]}>
                       {
-                      Array(point.count).fill().map((_, i) => {
+                      Array(point.count).fill(undefined).map((_, i) => {
                         const isTopPiece = rotation === 180 ? i === point.count - 1 : i === 0
                         
                         if (isTopPiece && canMoveFrom) {
@@ -450,7 +488,7 @@ const GameScreen = ({ onEndGame }) => {
   }
 
   return (
-    <View style={[styles.container, isOpening() ? CS.bgBlue : null]}>
+    <View style={[styles.container, isOpening() ? CS.bgBlue : null, safeArea]}>
       {
       isOpening()
         ?

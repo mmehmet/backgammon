@@ -1,13 +1,15 @@
 import React from 'react'
 import { View, Text, Pressable } from 'react-native'
 
+import { Scoreboard } from "../components/Scoreboard"
 import { useGameStore } from '../components/State'
 import CS from '../styles/CommonStyles'
 import styles from '../styles/StartScreenStyles'
+import { BLACK, WHITE } from "../utils/constants"
 
 const StartScreen = ({ onStart, onContinue }) => {
   const [hasSave, setHasSave] = React.useState(false)
-  const { hasSavedGame } = useGameStore()
+  const { hasSavedGame, points } = useGameStore()
 
   React.useEffect(() => {
     hasSavedGame().then(setHasSave)
@@ -27,6 +29,12 @@ const StartScreen = ({ onStart, onContinue }) => {
           </Pressable>
         )}
       </View>
+
+      {(points[BLACK] || points[WHITE]) && (
+        <View>
+          <Scoreboard points={points} />
+        </View>
+      )}
     </View>
   )
 }

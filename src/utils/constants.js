@@ -1,5 +1,9 @@
 export const WHITE = 'WHITE'
 export const BLACK = 'BLACK'
+export const LANDSCAPE_LEFT = 'LANDSCAPE-LEFT'
+export const LANDSCAPE_RIGHT = 'LANDSCAPE-RIGHT'
+export const GAMMON = 'GAMMON'
+export const BACKGAMMON = 'BACKGAMMON'
 export const HOME = {
   [BLACK]: [1, 2, 3, 4, 5, 6],
   [WHITE]: [24, 23, 22, 21, 20, 19]
@@ -24,7 +28,7 @@ export const MSG = {
   START: '{player} has the higher roll and will start.',
   DOUBLE: '{player} has rolled a double!',
   MOVES_REMAINING: '{player} has {count} {move} remaining.',
-  NO_LEGAL_MOVES: '{player} has no legal moves - switching to {nextPlayer}',
+  NO_LEGAL_MOVES: '{player} has no legal moves\nswitching to {nextPlayer}',
   EMPTY: '',
   TIE: "It's a tie! Roll again...",
 }

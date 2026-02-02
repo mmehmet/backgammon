@@ -14,6 +14,7 @@ export const DraggablePiece = ({ color, from, onDragStart, onDragEnd, onDrop }) 
   const translateY = useSharedValue(0)
 
   const pan = Gesture.Pan()
+    .minDistance(0)
     .onBegin(() => {
       runOnJS(onDragStart)(from)
     })

@@ -41,7 +41,12 @@ const styles = StyleSheet.create({
   message: { fontSize: 14, color: COLOURS.lightGrey, lineHeight: 18 },
   tiles: { position: 'absolute', width: '100%', alignItems: 'center' },
   tile: { marginBottom: -1, marginTop: -1 },
-  rollSection: { padding: 8, flex: 1, alignItems: 'center', justifyContent: "center" },
+  rollSection: {
+    padding: 8,
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: "center",
+  },
   barOverlay: {
     position: 'absolute',
     top: 0,
@@ -52,7 +57,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 10,
   },
-  rollSection: { padding: 8, flex: 1, alignItems: 'center', justifyContent: "center" },
   bearOffOverlay: {
     position: 'absolute',
     top: 9,
@@ -64,8 +68,8 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   barPieces: { alignItems: "center", gap: -10 },
-  bearOffPieces: { gap: 1 },
   highlight: { backgroundColor: COLOURS.green },
+  barPieceHighlight: { backgroundColor: COLOURS.blue, borderRadius: "100%" },
 })
 
 export default styles

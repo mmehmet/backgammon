@@ -76,6 +76,7 @@ export const useGameStore = create((set, get) => {
     board: initialBoard(),
     bar: { [WHITE]: 0, [BLACK]: 0 },
     bearOff: { [WHITE]: 0, [BLACK]: 0 },
+    points: { [WHITE]: 0, [BLACK]: 0 },
     currentPlayer: null,
     dice: [],
     remainingMoves: [],
@@ -117,6 +118,8 @@ export const useGameStore = create((set, get) => {
 
       return hitOccurred
     },
+
+    clearSavedGame: async () => AsyncStorage.removeItem(STORAGE_KEY),
 
     executeMove: (move) => set((state) => {
       const moves = [...state.remainingMoves]
@@ -164,38 +167,6 @@ export const useGameStore = create((set, get) => {
       return moves
     },
 
-    setDice: (die1, die2) => set({
-      dice: [die1, die2],
-      remainingMoves: die1 === die2 ? [die1, die1, die1, die2] : [die1, die2]
-    }),
-
-    switchPlayer: async () => {
-      await get().saveGame()
-      set((state) => ({
-        currentPlayer: state.currentPlayer === WHITE ? BLACK : WHITE,
-        dice: [],
-        remainingMoves: [],
-      }))
-    },
-
-    startGame: (startingPlayer) => set({
-      currentPlayer: startingPlayer,
-      phase: PHASE.PLAYING,
-    }),
-
-    resetBoard: () => set({
-      board: initialBoard(),
-      bar: { [WHITE]: 0, [BLACK]: 0 },
-      bearOff: { [WHITE]: 0, [BLACK]: 0 }
-    }),
-
-    resetState: () => set({
-      currentPlayer: null,
-      dice: [],
-      remainingMoves: [],
-      phase: PHASE.OPENING,
-    }),
-
     hasSavedGame: async () => {
       try {
         const data = await AsyncStorage.getItem(STORAGE_KEY)
@@ -219,10 +190,25 @@ export const useGameStore = create((set, get) => {
       return false
     },
 
+    resetBoard: () => set({
+      board: initialBoard(),
+      bar: { [WHITE]: 0, [BLACK]: 0 },
+      bearOff: { [WHITE]: 0, [BLACK]: 0 }
+    }),
+
+    resetState: () => set({
+      points: { [WHITE]: 0, [BLACK]: 0 },
+      currentPlayer: null,
+      dice: [],
+      remainingMoves: [],
+      phase: PHASE.OPENING,
+    }),
+
     saveGame: async () => {
       try {
         const state = get()
         const saveData = {
+          points: state.points,
           board: state.board,
           bar: state.bar,
           bearOff: state.bearOff,
@@ -238,6 +224,53 @@ export const useGameStore = create((set, get) => {
         console.error('Save failed:', error)
         return false
       }
+    },
+
+    setDice: (die1, die2) => set({
+      dice: [die1, die2],
+      remainingMoves: die1 === die2 ? [die1, die1, die1, die2] : [die1, die2]
+    }),
+
+    startGame: (startingPlayer) => set({
+      currentPlayer: startingPlayer,
+      phase: PHASE.PLAYING,
+    }),
+
+    switchPlayer: async () => {
+      await get().saveGame()
+      set((state) => ({
+        currentPlayer: state.currentPlayer === WHITE ? BLACK : WHITE,
+        dice: [],
+        remainingMoves: [],
+      }))
+    },
+    
+    updatePoints: (winner) => {
+      const { board, bar, bearOff } = get()
+      const loser = getOpponent(winner)
+      
+      if (bearOff[loser] > 0) {
+        set(state => ({
+          points: { ...state.points, [winner]: state.points[winner] + 1 },
+          dice: [],
+          remainingMoves: [],
+        }))
+
+        return 1
+      }
+      
+      let points = 2
+      if (bar[loser] > 0 || board.some((p, i) => p?.color === loser && HOME[winner].includes(i))) {
+        points = 3
+      }
+
+      set(state => ({
+        points: { ...state.points, [winner]: state.points[winner] + points },
+        dice: [],
+        remainingMoves: [],
+      }))
+      
+      return points
     },
   }
 })

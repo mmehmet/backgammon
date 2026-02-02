@@ -1,5 +1,7 @@
 package com.backgammon
 
+import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import com.facebook.react.ReactActivity
@@ -19,6 +21,13 @@ class MainActivity : ReactActivity() {
       or View.SYSTEM_UI_FLAG_FULLSCREEN
       or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
     )
+  }
+
+  override fun onConfigurationChanged(newConfig: Configuration) {
+    super.onConfigurationChanged(newConfig)
+    val intent = Intent("onConfigurationChanged")
+    intent.putExtra("newConfig", newConfig)
+    sendBroadcast(intent)
   }
 
   /**
