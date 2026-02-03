@@ -328,8 +328,12 @@ const GameScreen = ({ onEndGame }) => {
 
     return (
       <View style={styles.controls}>
-        <Text style={styles.message}>{message}</Text>
+        <View style={styles.messageWrapper}>
+          <Text style={[styles.text, styles.message]}>{message}</Text>
+        </View>
+
         <View style={[CS.row, CS.gap]}>{content}</View>
+
         <View style={[CS.gap, CS.centre]}>
           <Scoreboard points={points} red />
           <ExitButton onEndGame={handleExit} />

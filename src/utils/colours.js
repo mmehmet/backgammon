@@ -6,7 +6,7 @@ export const COLOURS = {
 
   yellow: '#ff5',
   beige: '#DEB887',
-  sienna: '#A0522D',
+  sienna: '#a3714e',
   mediumBrown: '#8B7355',
   darkBrown: '#503e2e',
 

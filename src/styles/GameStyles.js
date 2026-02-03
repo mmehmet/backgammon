@@ -1,6 +1,7 @@
 import { StyleSheet } from 'react-native'
-import { COLOURS } from '../utils/colours'
+
 import { diameter } from '../components/Piece'
+import { COLOURS } from '../utils/colours'
 
 const gutterWdith = diameter + 16 + 2 // two 8px borders and a 1px padding
 
@@ -37,8 +38,9 @@ const styles = StyleSheet.create({
     borderColor: COLOURS.white,
   },
   buttonRed: { borderWidth: 0, backgroundColor: COLOURS.red },
+  messageWrapper: { paddingHorizontal: 16 },
   text: { fontSize: 18, color: COLOURS.lightGrey, lineHeight: 24 },
-  message: { fontSize: 14, color: COLOURS.lightGrey, lineHeight: 18 },
+  message: { fontSize: 14, lineHeight: 18 },
   tiles: { position: 'absolute', width: '100%', alignItems: 'center' },
   tile: { marginBottom: -1, marginTop: -1 },
   rollSection: {
