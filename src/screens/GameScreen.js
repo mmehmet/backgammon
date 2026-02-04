@@ -4,12 +4,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Orientation from 'react-native-orientation-locker'
 
 import { AnimatedDice } from '../components/AnimatedDice'
+import { Cube } from '../components/Cube'
 import { Dice } from '../components/Dice'
-import { DraggablePiece } from "../components/DraggablePiece"
+import { DoublingButton } from '../components/DoublingButton'
+import { DraggablePiece } from '../components/DraggablePiece'
 import { ExitButton } from '../components/ExitButton'
 import { getOpponent, getDestination } from '../components/Logic'
+import { Offer } from '../components/Offer'
 import { Piece } from '../components/Piece'
-import { RollButton } from "../components/RollButton"
+import { RollButton } from '../components/RollButton'
+import { Scoreboard } from '../components/Scoreboard'
 import { SidePiece } from '../components/SidePiece'
 import { useGameStore } from '../components/State'
 import { Triangle } from '../components/Triangle'
@@ -27,7 +31,6 @@ import {
   GAMMON,
 } from '../utils/constants'
 import { getRoll, ucFirst, formatMsg } from '../utils/helpers'
-import { Scoreboard } from "../components/Scoreboard";
 
 const GameScreen = ({ onEndGame }) => {
   const insets = useSafeAreaInsets()
@@ -40,6 +43,7 @@ const GameScreen = ({ onEndGame }) => {
   const [dragging, setDragging] = React.useState(null) // { from, pieceX, pieceY }
   const [validDestinations, setValidDestinations] = React.useState([])
   const [places, setPlaces] = React.useState({})
+  const [showDouble, setShowDouble] = React.useState(false)
 
   const topHalf = Dimensions.get('window').height / 2
   const {
@@ -47,10 +51,15 @@ const GameScreen = ({ onEndGame }) => {
     board,
     bar,
     bearOff,
+    clearSavedGame,
     currentPlayer,
     dice,
     remainingMoves,
+    stake,
+    hasCube,
     phase,
+    acceptDouble,
+    endGame,
     resetBoard,
     applyMove,
     executeMove,
@@ -147,17 +156,23 @@ const GameScreen = ({ onEndGame }) => {
         const label = earned > 2 ? BACKGAMMON : GAMMON
         msg = `${msg} - ${label}!`
       }
-      const updated = {
-        ...points,
-        [currentPlayer]: points[currentPlayer] + earned
-      }
-      setMessage(`${msg}\n[Black: ${updated[BLACK]} | White: ${updated[WHITE]}]`)
+      setMessage(msg)
       
       setTimeout(() => {
         resetBoard()
       }, 2000)
     }
   }, [bearOff, currentPlayer])
+
+  React.useEffect(() => {
+    const a = points[WHITE]
+    const b = points[BLACK]
+    const winner = a > 4 ? WHITE : BLACK
+    if (a > 4 || b > 4) {
+      setMessage(formatMsg(MSG.WINNER, { player: ucFirst(winner) }))
+      endGame()
+    }
+  }, [points])
 
   const findDestination = (dropX, dropY) => {
     // Check bear-off first
@@ -183,6 +198,24 @@ const GameScreen = ({ onEndGame }) => {
     }
 
     return null
+  }
+
+  const handleAccept = async () => {
+    acceptDouble()
+    await saveGame()
+    setShowDouble(false)
+  }
+
+  const handleDecline = () => {
+    console.log("GAME OVER - FORFEIT")
+    const winner = getOpponent(currentPlayer)
+    const earned = updatePoints(winner)
+    setMessage(`${ucFirst(winner)} wins ${earned} points due to forfeit`)
+    setShowDouble(false)
+
+    setTimeout(() => {
+      resetBoard()
+    }, 2000)
   }
 
   const handleDragEnd = () => {
@@ -219,7 +252,12 @@ const GameScreen = ({ onEndGame }) => {
   }
 
   const handleExit = async () => {
-    await saveGame()
+    if (phase === PHASE.FINISHED) {
+      await clearSavedGame()
+    } else {
+      await saveGame()
+    }
+
     onEndGame()
   }
 
@@ -298,41 +336,13 @@ const GameScreen = ({ onEndGame }) => {
   const renderControls = () => {
     if (!currentPlayer) return null
 
-    const inverted = currentPlayer === BLACK
-    let content = !resolving
-      ?
-      <RollButton currentPlayer={currentPlayer} onPress={() => roll(currentPlayer)} />
-      :
-      <>
-        <AnimatedDice color={currentPlayer} />
-        <AnimatedDice color={currentPlayer} />
-      </>
-
-    if (dice.length > 0) {
-      if (dice[0] === dice[1]) {
-        const usedCount = 4 - remainingMoves.length
-        content = <>
-          <Dice value={dice[0]} inverted={inverted} used={usedCount > 0} />
-          <Dice value={dice[0]} inverted={inverted} used={usedCount > 1} />
-          <Dice value={dice[0]} inverted={inverted} used={usedCount > 2} />
-          <Dice value={dice[0]} inverted={inverted} used={usedCount > 3} />
-        </>
-      } else {
-        const usedDice = dice.filter(d => !remainingMoves.includes(d))
-        content = <>
-          <Dice value={dice[0]} inverted={inverted} used={usedDice.includes(dice[0])} />
-          <Dice value={dice[1]} inverted={inverted} used={usedDice.includes(dice[1])} />
-        </>
-      }
-    }
-
     return (
       <View style={styles.controls}>
         <View style={styles.messageWrapper}>
-          <Text style={[styles.text, styles.message]}>{message}</Text>
+          <Text style={[styles.text, phase === PHASE.FINISHED ? styles.buttonText : styles.message]}>{message}</Text>
         </View>
 
-        <View style={[CS.row, CS.gap]}>{content}</View>
+        <View style={[CS.row, CS.gap]}>{renderDiceArea()}</View>
 
         <View style={[CS.gap, CS.centre]}>
           <Scoreboard points={points} red />
@@ -340,6 +350,73 @@ const GameScreen = ({ onEndGame }) => {
         </View>
       </View>
     )
+  }
+  
+  const renderDiceArea = () => {
+    if (phase === PHASE.FINISHED) return null
+
+    if (resolving) {
+      return (
+        <>
+          <AnimatedDice color={currentPlayer} />
+          <AnimatedDice color={currentPlayer} />
+        </>
+      );
+    }
+
+    if (showDouble) {
+      return (
+        <Offer
+          onAccept={handleAccept}
+          onDecline={handleDecline}
+          from={currentPlayer}
+        />
+      );
+    }
+
+    if (dice.length > 0) {
+      const inverted = currentPlayer === BLACK;
+
+      if (dice[0] === dice[1]) {
+        const usedCount = 4 - remainingMoves.length;
+        return (
+          <>
+            <Dice value={dice[0]} inverted={inverted} used={usedCount > 0} />
+            <Dice value={dice[0]} inverted={inverted} used={usedCount > 1} />
+            <Dice value={dice[0]} inverted={inverted} used={usedCount > 2} />
+            <Dice value={dice[0]} inverted={inverted} used={usedCount > 3} />
+          </>
+        );
+      }
+
+      const usedDice = dice.filter(d => !remainingMoves.includes(d));
+      return (
+        <>
+          <Dice
+            value={dice[0]}
+            inverted={inverted}
+            used={usedDice.includes(dice[0])}
+          />
+          <Dice
+            value={dice[1]}
+            inverted={inverted}
+            used={usedDice.includes(dice[1])}
+          />
+        </>
+      );
+    }
+
+    return (
+      <View style={CS.gap}>
+        <RollButton
+          currentPlayer={currentPlayer}
+          onPress={() => roll(currentPlayer)}
+        />
+        {hasCube !== getOpponent(currentPlayer) && stake < 64 && (
+          <DoublingButton onPress={showDoubling} />
+        )}
+      </View>
+    );
   }
 
   const renderGutter = () => (
@@ -364,7 +441,9 @@ const GameScreen = ({ onEndGame }) => {
       }}
     >
         <View style={[styles.frame, styles.sideFrame]} />
-        <View style={[styles.frame, styles.sideFrame, styles.cubeFrame]} />
+        <View style={[styles.frame, styles.sideFrame, styles.cubeFrame]}>
+          <Cube value={stake} owner={hasCube} />
+        </View>
         <View style={[styles.frame, styles.sideFrame]} />
         {renderBearOff()}
       </View>
@@ -490,6 +569,8 @@ const GameScreen = ({ onEndGame }) => {
       setResolving(null)
     }, 840)
   }
+  
+  const showDoubling = () => setShowDouble(true)
 
   return (
     <View style={[styles.container, isOpening() ? CS.bgBlue : null, safeArea]}>

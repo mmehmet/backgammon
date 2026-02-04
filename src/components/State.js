@@ -80,12 +80,20 @@ export const useGameStore = create((set, get) => {
     currentPlayer: null,
     dice: [],
     remainingMoves: [],
+    stake: 1,
+    hasCube: null,
     phase: PHASE.OPENING,
+
+    acceptDouble: () =>
+      set(state => ({
+        stake: Math.min(state.stake * 2, 64),
+        hasCube: getOpponent(state.currentPlayer),
+      })),
 
     applyMove: (from, roll, player) => {
       let hitOccurred = false
 
-      set((state) => {
+      set(state => {
         const newBoard = [...state.board]
         const newBar = { ...state.bar }
         const newBearOff = { ...state.bearOff }
@@ -119,9 +127,14 @@ export const useGameStore = create((set, get) => {
       return hitOccurred
     },
 
-    clearSavedGame: async () => AsyncStorage.removeItem(STORAGE_KEY),
+    clearSavedGame: async () => {
+      await AsyncStorage.removeItem(STORAGE_KEY)
+      set({ points: { [WHITE]: 0, [BLACK]: 0 } })
+    },
 
-    executeMove: (move) => set((state) => {
+    endGame: () => set({ phase: PHASE.FINISHED }),
+
+    executeMove: (move) => set(state => {
       const moves = [...state.remainingMoves]
       if (moves.includes(move)) {
         return {
@@ -132,7 +145,7 @@ export const useGameStore = create((set, get) => {
       if (state.dice.length === 2 && state.dice[0] !== state.dice[1]) {
         return { remainingMoves: [] }
       }
-      
+
       return { remainingMoves: moves.slice(move / moves[0]) }
     }),
 
@@ -140,9 +153,9 @@ export const useGameStore = create((set, get) => {
       const { board, bar } = get()
       const possible = getMoves(remainingMoves)
       const moves = []
-      const positions = bar[player] > 0
-        ? [-1]
-        : board.map((p, i) => p?.color === player ? i : null).filter(i => i !== null)
+      const positions = bar[player] > 0 ?
+        [-1] :
+        board.map((p, i) => (p?.color === player ? i : null)).filter(i => i !== null)
 
       positions.forEach(from => {
         possible.forEach(sequence => {
@@ -193,7 +206,9 @@ export const useGameStore = create((set, get) => {
     resetBoard: () => set({
       board: initialBoard(),
       bar: { [WHITE]: 0, [BLACK]: 0 },
-      bearOff: { [WHITE]: 0, [BLACK]: 0 }
+      bearOff: { [WHITE]: 0, [BLACK]: 0 },
+      stake: 1,
+      hasCube: null,
     }),
 
     resetState: () => set({
@@ -216,7 +231,8 @@ export const useGameStore = create((set, get) => {
           dice: state.dice,
           remainingMoves: state.remainingMoves,
           phase: state.phase,
-          rolls: state.rolls,
+          stake: state.stake,
+          hasCube: state.hasCube,
         }
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(saveData))
         return true
@@ -238,30 +254,33 @@ export const useGameStore = create((set, get) => {
 
     switchPlayer: async () => {
       await get().saveGame()
-      set((state) => ({
+      set(state => ({
         currentPlayer: state.currentPlayer === WHITE ? BLACK : WHITE,
         dice: [],
         remainingMoves: [],
       }))
     },
-    
+
     updatePoints: (winner) => {
-      const { board, bar, bearOff } = get()
+      const { board, bar, bearOff, stake } = get()
       const loser = getOpponent(winner)
-      
-      if (bearOff[loser] > 0) {
+
+      if (bearOff[loser] > 0 || bearOff[winner] < 15) {
         set(state => ({
-          points: { ...state.points, [winner]: state.points[winner] + 1 },
+          points: { ...state.points, [winner]: state.points[winner] + stake },
           dice: [],
           remainingMoves: [],
         }))
 
-        return 1
+        return stake
       }
-      
-      let points = 2
-      if (bar[loser] > 0 || board.some((p, i) => p?.color === loser && HOME[winner].includes(i))) {
-        points = 3
+
+      let points = 2 * stake
+      if (
+        bar[loser] > 0 ||
+        board.some((p, i) => p?.color === loser && HOME[winner].includes(i))
+      ) {
+        points = 3 * stake
       }
 
       set(state => ({
@@ -269,7 +288,7 @@ export const useGameStore = create((set, get) => {
         dice: [],
         remainingMoves: [],
       }))
-      
+
       return points
     },
   }

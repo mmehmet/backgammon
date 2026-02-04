@@ -3,6 +3,7 @@ export const COLOURS = {
   darkRed: '#ac423c',
 
   green: '#8efa11',
+  darkGreen: '#518f14',
 
   yellow: '#ff5',
   beige: '#DEB887',
@@ -11,6 +12,7 @@ export const COLOURS = {
   darkBrown: '#503e2e',
 
   blue: '#33cafe',
+  mediumBlue: '#3c7f99',
   darkBlue: '#2c3e50',
 
   white: '#FFFFFF',

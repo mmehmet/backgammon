@@ -32,6 +32,7 @@ const CS = StyleSheet.create({
     gap: 16,
   },
   black: { color: COLOURS.black },
+  red: { color: COLOURS.red },
   bgBlack: { backgroundColor: COLOURS.black },
   bgBlue: { backgroundColor: COLOURS.darkBlue },
   bgWhite: { backgroundColor: COLOURS.offWhite },
@@ -40,7 +41,7 @@ const CS = StyleSheet.create({
   buttonText: {
     color: COLOURS.white,
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: 900,
     lineHeight: 24,
   },
   buttonTextDark: { color: COLOURS.darkGrey },

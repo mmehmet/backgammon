@@ -28,8 +28,9 @@ export const MSG = {
   START: '{player} has the higher roll and will start.',
   DOUBLE: '{player} has rolled a double!',
   MOVES_REMAINING: '{player} has {count} {move} remaining.',
-  NO_LEGAL_MOVES: '{player} has no legal moves\nswitching to {nextPlayer}',
+  NO_LEGAL_MOVES: '{player} has no legal moves! Switching to {nextPlayer}...',
   EMPTY: '',
   TIE: "It's a tie! Roll again...",
+  WINNER: '{player} wins the match!'
 }
 export const STORAGE_KEY = '@backgammon_game_state'
