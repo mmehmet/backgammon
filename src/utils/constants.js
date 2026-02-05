@@ -4,6 +4,14 @@ export const LANDSCAPE_LEFT = 'LANDSCAPE-LEFT'
 export const LANDSCAPE_RIGHT = 'LANDSCAPE-RIGHT'
 export const GAMMON = 'GAMMON'
 export const BACKGAMMON = 'BACKGAMMON'
+
+export const API_URL = 'http://46.224.159.43'
+
+export const LEVELS = {
+  EASY: 0,
+  MEDIUM: 1,
+  HARD: 2
+}
 export const HOME = {
   [BLACK]: [1, 2, 3, 4, 5, 6],
   [WHITE]: [24, 23, 22, 21, 20, 19]
