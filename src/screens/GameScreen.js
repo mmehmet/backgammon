@@ -3,6 +3,7 @@ import { View, Text, Dimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Orientation from 'react-native-orientation-locker'
 
+import ProviderFactory from "../components/AI/ProviderFactory"
 import { AnimatedDice } from '../components/AnimatedDice'
 import { Cube } from '../components/Cube'
 import { Dice } from '../components/Dice'
@@ -16,6 +17,7 @@ import { RollButton } from '../components/RollButton'
 import { Scoreboard } from '../components/Scoreboard'
 import { SidePiece } from '../components/SidePiece'
 import { useGameStore } from '../components/State'
+import { ThinkingIndicator } from "../components/ThinkingIndicator"
 import { Triangle } from '../components/Triangle'
 import CS from '../styles/CommonStyles'
 import styles from '../styles/GameStyles'
@@ -30,7 +32,7 @@ import {
   BACKGAMMON,
   GAMMON,
 } from '../utils/constants'
-import { getRoll, ucFirst, formatMsg } from '../utils/helpers'
+import { getRoll, ucFirst, formatMsg, moveToRoll } from '../utils/helpers'
 
 const GameScreen = ({ onEndGame }) => {
   const insets = useSafeAreaInsets()
@@ -44,6 +46,8 @@ const GameScreen = ({ onEndGame }) => {
   const [validDestinations, setValidDestinations] = React.useState([])
   const [places, setPlaces] = React.useState({})
   const [showDouble, setShowDouble] = React.useState(false)
+  const [provider, setProvider] = React.useState(null)
+  const [thinking, setThinking] = React.useState(false)
 
   const topHalf = Dimensions.get('window').height / 2
   const {
@@ -58,6 +62,9 @@ const GameScreen = ({ onEndGame }) => {
     stake,
     hasCube,
     phase,
+    audio,
+    ai,
+    difficulty,
     acceptDouble,
     endGame,
     resetBoard,
@@ -84,6 +91,17 @@ const GameScreen = ({ onEndGame }) => {
   }, [])
 
   React.useEffect(() => {
+    if (ai) {
+      ProviderFactory.create().then(p => {
+        if (p) {
+          p.setDifficulty(difficulty)
+          setProvider(p)
+        }
+      })
+    }
+  }, [ai, difficulty])
+
+  React.useEffect(() => {
     const determineStarter = () => {
       if (whiteRoll === 0 || blackRoll === 0) return null
       if (whiteRoll > blackRoll) return WHITE
@@ -106,6 +124,40 @@ const GameScreen = ({ onEndGame }) => {
       }
     }
   }, [whiteRoll, blackRoll, startGame])
+
+  React.useEffect(() => {
+    if (ai && whiteRoll > 0 && blackRoll === 0 && !resolving) {
+      setTimeout(() => roll(BLACK), 2000)
+    }
+  }, [whiteRoll, blackRoll, ai, resolving])
+  
+  React.useEffect(() => {
+    const go = ai && provider && currentPlayer === BLACK && phase === PHASE.PLAYING
+    if (!go) return
+    
+    if (dice.length < 1) {
+      setTimeout(() => roll(BLACK), 1000)
+      return
+    }
+    
+    if (remainingMoves.length < 1) return
+    
+    const execute = async () => {
+      setThinking(true)
+      const moves = await provider.getMove({ dice, board, bar, remainingMoves })
+      setThinking(false)
+
+      for (const { from, to } of moves) {
+        const roll = moveToRoll(from, to)
+        applyMove(from, roll, BLACK)
+        executeMove(roll)
+        await new Promise(resolve => setTimeout(resolve, 500))
+      }
+    }
+    
+    const timer = setTimeout(execute, 1500)
+    return () => clearTimeout(timer)
+  }, [ai, provider, currentPlayer, phase, dice, remainingMoves])
 
   React.useEffect(() => {
     if (phase !== PHASE.PLAYING || !currentPlayer) return
@@ -358,8 +410,8 @@ const GameScreen = ({ onEndGame }) => {
     if (resolving) {
       return (
         <>
-          <AnimatedDice color={currentPlayer} />
-          <AnimatedDice color={currentPlayer} />
+          <AnimatedDice color={currentPlayer} audio={audio} />
+          <AnimatedDice color={currentPlayer} audio={audio} />
         </>
       );
     }
@@ -449,32 +501,39 @@ const GameScreen = ({ onEndGame }) => {
       </View>
   )
 
-  const renderOpeningRoll = () => (
-    <View style={CS.container}>
-      <Text style={styles.text}>{message || 'Roll to determine who starts'}</Text>
+  const renderOpeningRoll = () => {
+    let blackButton = null
+    if (!ai) {
+      blackButton = <RollButton player={BLACK} onPress={() => roll(BLACK)} />
+    }
 
-      <View style={CS.row}>
-        <View style={styles.rollSection}>
-          {whiteRoll > 0 && <Dice value={whiteRoll} />}
-          {whiteRoll === 0 && (
-            resolving === WHITE
-              ? <AnimatedDice color={WHITE} />
-              : <RollButton player={WHITE} onPress={() => roll(WHITE)} />
-          )}
-        </View>
+    return (
+      <View style={CS.container}>
+        <Text style={styles.text}>{message || 'Roll to determine who starts'}</Text>
 
-        <View style={styles.rollSection}>
-          {blackRoll > 0 && <Dice value={blackRoll} inverted />}
-          {blackRoll === 0 && (
-            resolving === BLACK
-              ? <AnimatedDice color={BLACK} />
-              : <RollButton player={BLACK} onPress={() => roll(BLACK)} />
-          )}
+        <View style={CS.row}>
+          <View style={styles.rollSection}>
+            {whiteRoll > 0 && <Dice value={whiteRoll} />}
+            {whiteRoll === 0 && (
+              resolving === WHITE
+                ? <AnimatedDice color={WHITE} />
+                : <RollButton player={WHITE} onPress={() => roll(WHITE)} />
+            )}
+          </View>
+
+          <View style={styles.rollSection}>
+            {blackRoll > 0 && <Dice value={blackRoll} inverted />}
+            {blackRoll === 0 && (
+              resolving === BLACK
+                ? <AnimatedDice color={BLACK} />
+                : blackButton
+            )}
+          </View>
         </View>
+        <ExitButton onEndGame={onEndGame} />
       </View>
-      <ExitButton onEndGame={onEndGame} />
-    </View>
-  )
+    )
+  }
 
   const renderPositions = (start, end) => {
     const rotation = start < 13 ? 180 : 0
@@ -587,6 +646,7 @@ const GameScreen = ({ onEndGame }) => {
           </>
         </View>
       }
+      { thinking && <ThinkingIndicator />}
     </View>
   )
 }

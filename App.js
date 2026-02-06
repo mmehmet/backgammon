@@ -16,10 +16,10 @@ const App = () => {
     setGameActive(false)
   }
 
-  const handleStart = () => {
+  const handleStart = ({ ai, difficulty, audio }) => {
     console.log('New game started')
     resetBoard()
-    resetState()
+    resetState(ai, difficulty, audio)
     setGameActive(true)
   }
 

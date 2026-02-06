@@ -2,7 +2,15 @@ import { create } from 'zustand'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import { getDestination, getOpponent } from "./Logic"
-import { PHASE, WHITE, BLACK, STARTING_POSITIONS, HOME, STORAGE_KEY } from '../utils/constants'
+import {
+  PHASE,
+  WHITE,
+  BLACK,
+  STARTING_POSITIONS,
+  HOME,
+  STORAGE_KEY,
+  LEVELS,
+} from '../utils/constants'
 
 const initialBoard = () => {
   const board = []
@@ -83,6 +91,9 @@ export const useGameStore = create((set, get) => {
     stake: 1,
     hasCube: null,
     phase: PHASE.OPENING,
+    ai: false,
+    difficulty: LEVELS.EASY,
+    audio: true,
 
     acceptDouble: () =>
       set(state => ({
@@ -189,6 +200,25 @@ export const useGameStore = create((set, get) => {
       }
     },
 
+    resetBoard: () => set({
+      board: initialBoard(),
+      bar: { [WHITE]: 0, [BLACK]: 0 },
+      bearOff: { [WHITE]: 0, [BLACK]: 0 },
+      stake: 1,
+      hasCube: null,
+    }),
+
+    resetState: (ai, difficulty, audio) => set({
+      points: { [WHITE]: 0, [BLACK]: 0 },
+      currentPlayer: null,
+      dice: [],
+      remainingMoves: [],
+      phase: PHASE.OPENING,
+      ai: ai,
+      difficulty: difficulty,
+      audio: audio,
+    }),
+
     restoreGame: async () => {
       try {
         const savedData = await AsyncStorage.getItem(STORAGE_KEY)
@@ -202,22 +232,6 @@ export const useGameStore = create((set, get) => {
 
       return false
     },
-
-    resetBoard: () => set({
-      board: initialBoard(),
-      bar: { [WHITE]: 0, [BLACK]: 0 },
-      bearOff: { [WHITE]: 0, [BLACK]: 0 },
-      stake: 1,
-      hasCube: null,
-    }),
-
-    resetState: () => set({
-      points: { [WHITE]: 0, [BLACK]: 0 },
-      currentPlayer: null,
-      dice: [],
-      remainingMoves: [],
-      phase: PHASE.OPENING,
-    }),
 
     saveGame: async () => {
       try {
@@ -233,6 +247,9 @@ export const useGameStore = create((set, get) => {
           phase: state.phase,
           stake: state.stake,
           hasCube: state.hasCube,
+          ai: state.ai,
+          difficulty: state.difficulty,
+          audio: state.audio,
         }
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(saveData))
         return true

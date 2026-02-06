@@ -96,6 +96,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  thinking: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -24 }, { translateY: -24 }],
+    backgroundColor: COLOURS.darkBlue,
+    padding: 16,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: COLOURS.red,
+  },
 })
 
 export default styles

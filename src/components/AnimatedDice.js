@@ -1,27 +1,33 @@
-import { Animated } from 'react-native'
 import { useEffect, useRef, useState } from 'react'
+import { Animated } from 'react-native'
 import Sound from 'react-native-sound'
+
 import { Dice } from './Dice'
 import { BLACK } from '../utils/constants'
 
 Sound.setCategory('Playback')
 
-export const AnimatedDice = ({ color }) => {
+const MP3 = 'dice_roll.mp3'
+
+export const AnimatedDice = ({ color, audio }) => {
   const [displayValue, setDisplayValue] = useState(1)
   const rotateAnim = useRef(new Animated.Value(0)).current
   const cycleInterval = useRef(null)
 
   useEffect(() => {
-    const sound = new Sound('dice_roll.mp3', Sound.MAIN_BUNDLE, (error) => {
-      if (error) {
-        console.log('Failed to load sound', error)
-        return
-      }
-      sound.play((success) => {
-        if (!success) console.log('Sound playback failed')
-        sound.release()
+    if (audio) {
+      const sound = new Sound(MP3, Sound.MAIN_BUNDLE, (error) => {
+        if (error) {
+          console.log('Failed to load sound', error)
+          return
+        }
+
+        sound.play((success) => {
+          if (!success) console.log('Sound playback failed')
+          sound.release()
+        })
       })
-    })
+    }
 
     Animated.loop(
       Animated.timing(rotateAnim, {
@@ -38,7 +44,7 @@ export const AnimatedDice = ({ color }) => {
     return () => {
       clearInterval(cycleInterval.current)
     }
-  }, [rotateAnim])
+  }, [rotateAnim, audio])
 
   const spin = rotateAnim.interpolate({
     inputRange: [0, 1],
