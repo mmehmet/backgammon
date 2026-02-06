@@ -29,7 +29,7 @@ const StartScreen = ({ onStart, onContinue }) => {
         <Settings onSubmit={handleSubmitSettings} />
       ) : (
       <View style={CS.gap}>
-          <Pressable style={CS.button} onPress={handleNewGame}>
+        <Pressable style={CS.button} onPress={handleNewGame}>
           <Text style={CS.buttonText}>New Game</Text>
         </Pressable>
 
@@ -41,7 +41,7 @@ const StartScreen = ({ onStart, onContinue }) => {
       </View>
       )}
 
-      {(points[BLACK] || points[WHITE]) && (
+      {(points[BLACK] > 0 || points[WHITE] > 0) && (
         <View>
           <Scoreboard points={points} />
         </View>

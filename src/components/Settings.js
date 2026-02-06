@@ -1,80 +1,110 @@
 import React from 'react'
 import { View, Text, Pressable } from 'react-native'
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  runOnJS
+} from 'react-native-reanimated'
+import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 
 import CS from '../styles/CommonStyles'
 import styles from '../styles/StartScreenStyles'
+import Toggle from './Toggle'
 import { LEVELS } from '../utils/constants'
 
+// slider thumb width
+const FULL = 40
+const HALF = 20
+const levels = [LEVELS.EASY, LEVELS.MEDIUM, LEVELS.HARD]
+
 const Settings = ({ onSubmit }) => {
-  const [players, setPlayers] = React.useState(2)
+  const [ai, setAi] = React.useState(false)
   const [difficulty, setDifficulty] = React.useState(LEVELS.EASY)
   const [audio, setAudio] = React.useState(true)
 
-  const handleSubmit = () => onSubmit({ ai: (players === 1), difficulty, audio })
+  const trackWidth = useSharedValue(0)
+  const translateX = useSharedValue(0)
+  const startX = useSharedValue(0)
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }]
+  }))
+
+  const getPosition = (level) => {
+    if (trackWidth.value === 0) return 0
+    if (level === LEVELS.EASY) return 0
+    if (level === LEVELS.MEDIUM) return trackWidth.value / 2 - HALF
+    return trackWidth.value - FULL
+  }
+
+  React.useEffect(() => {
+    if (trackWidth.value > 0) {
+      translateX.value = getPosition(difficulty)
+    }
+  }, [difficulty])
+
+  const gesture = Gesture.Pan()
+    .onStart(() => {
+      startX.value = translateX.value
+    })
+    .onUpdate((event) => {
+      translateX.value = Math.max(0, Math.min(trackWidth.value, startX.value + event.translationX))
+    })
+    .onEnd(() => {
+      const pos = translateX.value
+      const positionRatio = pos / (trackWidth.value - FULL)
+      const index = Math.min(2, Math.max(0, Math.round(positionRatio * 2)))
+
+      const positions = [0, (trackWidth.value / 2) - HALF, trackWidth.value - FULL]
+
+      translateX.value = withSpring(positions[index])
+      runOnJS(setDifficulty)(levels[index])
+    })
+
+  const handleAudio = () => setAudio(!audio)
+
+  const handlePlayers = () => setAi(!ai)
+
+  const handleSubmit = () => onSubmit({ ai, difficulty, audio })
+
+  const renderDifficulty = () => {
+    return (
+      <View style={[CS.gap, !ai && { opacity: 0 }]} pointerEvents={ai ? 'auto' : 'none'}>
+        <Text style={styles.label}>AI Opponent Difficulty</Text>
+        <View
+          style={styles.sliderContainer}
+          onLayout={(e) => { trackWidth.value = e.nativeEvent.layout.width }}
+        >
+          <View style={styles.sliderTrack} />
+          <GestureDetector gesture={gesture}>
+            <Animated.View style={[styles.sliderThumb, animatedStyle]} />
+          </GestureDetector>
+        </View>
+        <View style={styles.sliderLabels}>
+          <Text style={styles.sliderLabel}>Easy</Text>
+          <Text style={styles.sliderLabel}>Medium</Text>
+          <Text style={styles.sliderLabel}>Hard</Text>
+        </View>
+      </View>
+    )
+  }
 
   return (
-    <View style={CS.gap}>
-      <View style={CS.gap}>
-        <Text style={styles.label}>Players</Text>
-        <View style={CS.row}>
-          <Pressable
-            style={[styles.toggle, players === 2 && styles.toggleActive]}
-            onPress={() => setPlayers(2)}
-          >
-            <Text style={[styles.toggleText, players === 2 && styles.toggleTextActive]}>2 Players</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.toggle, players === 1 && styles.toggleActive]}
-            onPress={() => setPlayers(1)}
-          >
-            <Text style={[styles.toggleText, players === 1 && styles.toggleTextActive]}>vs AI</Text>
-          </Pressable>
+    <View style={styles.gap}>
+      <View style={styles.row}>
+        <View style={styles.row}>
+          <Text style={styles.label}>Audio</Text>
+          <Toggle value={audio} onToggle={handleAudio} />
+        </View>
+
+        <View style={styles.row}>
+          <Text style={styles.label}>AI Opponent</Text>
+          <Toggle value={ai} onToggle={handlePlayers} />
         </View>
       </View>
 
-      {players === 1 && (
-        <View style={CS.gap}>
-          <Text style={styles.label}>Difficulty</Text>
-          <View style={CS.row}>
-            <Pressable
-              style={[styles.toggle, difficulty === LEVELS.EASY && styles.toggleActive]}
-              onPress={() => setDifficulty(LEVELS.EASY)}
-            >
-              <Text style={[styles.toggleText, difficulty === LEVELS.EASY && styles.toggleTextActive]}>Easy</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.toggle, difficulty === LEVELS.MEDIUM && styles.toggleActive]}
-              onPress={() => setDifficulty(LEVELS.MEDIUM)}
-            >
-              <Text style={[styles.toggleText, difficulty === LEVELS.MEDIUM && styles.toggleTextActive]}>Medium</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.toggle, difficulty === LEVELS.HARD && styles.toggleActive]}
-              onPress={() => setDifficulty(LEVELS.HARD)}
-            >
-              <Text style={[styles.toggleText, difficulty === LEVELS.HARD && styles.toggleTextActive]}>Hard</Text>
-            </Pressable>
-          </View>
-        </View>
-      )}
-
-      <View style={CS.gap}>
-        <Text style={styles.label}>Audio</Text>
-        <View style={CS.row}>
-          <Pressable
-            style={[styles.toggle, audio && styles.toggleActive]}
-            onPress={() => setAudio(true)}
-          >
-            <Text style={[styles.toggleText, audio && styles.toggleTextActive]}>On</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.toggle, !audio && styles.toggleActive]}
-            onPress={() => setAudio(false)}
-          >
-            <Text style={[styles.toggleText, !audio && styles.toggleTextActive]}>Off</Text>
-          </Pressable>
-        </View>
-      </View>
+      {renderDifficulty()}
 
       <Pressable style={CS.button} onPress={handleSubmit}>
         <Text style={CS.buttonText}>Start Game</Text>

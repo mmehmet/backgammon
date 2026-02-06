@@ -3,12 +3,14 @@ import { COLOURS } from '../utils/colours'
 
 const styles = StyleSheet.create({
   bg: { backgroundColor: COLOURS.darkBlue },
+  gap: { gap: 24 },
   title: {
     fontSize: 48,
     fontWeight: 'bold',
     color: COLOURS.white,
     marginBottom: 32
   },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 16, justifyContent: 'space-between' },
   label: {
     color: COLOURS.white,
     fontSize: 18,
@@ -16,17 +18,49 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   toggle: {
-    flex: 1,
-    backgroundColor: COLOURS.disabled,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    width: 100,
+    flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: 4
+    justifyContent: 'space-between',
+    backgroundColor: COLOURS.darkGrey,
+    padding: 4,
+    paddingRight: 16,
+    borderRadius: 50,
   },
-  toggleActive: { backgroundColor: COLOURS.red },
-  toggleText: { color: COLOURS.darkGrey, fontSize: 16, fontWeight: 600 },
-  toggleTextActive: { color: COLOURS.white },
+  toggleCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLOURS.white,
+  },
+  toggleActive: { backgroundColor: COLOURS.toggleGreen, paddingLeft: 16, paddingRight: 4 },
+  toggleText: { color: COLOURS.disabled, fontSize: 24, lineHeight: 24, fontWeight: 700 },
+  toggleTextActive: { color: COLOURS.darkGrey },
+  sliderContainer: {
+    height: 20,
+    justifyContent: 'center',
+  },
+  sliderTrack: {
+    height: 4,
+    backgroundColor: COLOURS.mediumGrey,
+    borderRadius: 2,
+  },
+  sliderThumb: {
+    width: 40,
+    height: 20,
+    borderRadius: 20,
+    backgroundColor: COLOURS.lightGrey,
+    position: 'absolute',
+  },
+  sliderLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  sliderLabel: {
+    color: COLOURS.white,
+    fontSize: 14,
+    fontWeight: 600,
+  },
 })
 
 export default styles

@@ -17,6 +17,7 @@ const App = () => {
   }
 
   const handleStart = ({ ai, difficulty, audio }) => {
+    console.debug('starting', ai, difficulty, audio)
     console.log('New game started')
     resetBoard()
     resetState(ai, difficulty, audio)

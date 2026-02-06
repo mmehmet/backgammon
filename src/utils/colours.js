@@ -3,6 +3,7 @@ export const COLOURS = {
   darkRed: '#ac423c',
 
   green: '#8efa11',
+  toggleGreen: '#34C759',
   darkGreen: '#518f14',
 
   yellow: '#ff5',
