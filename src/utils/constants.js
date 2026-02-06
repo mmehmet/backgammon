@@ -12,6 +12,46 @@ export const LEVELS = {
   MEDIUM: 1,
   HARD: 2
 }
+export const AI_CONFIG = {
+  EASY: {
+    COST: 30,
+    REWARD: 40,
+    TURN_VALUE: 10,
+    POINT_VALUE: 20,
+    PRIME_VALUE: 15,
+    RISK: 0.3,
+    RANDOM: 0.25 // 25% random moves
+  },
+  MEDIUM: {
+    COST: 70,
+    REWARD: 85,
+    TURN_VALUE: 25,
+    POINT_VALUE: 50,
+    PRIME_VALUE: 40,
+    RISK: 0.7,
+    RANDOM: 0.15 // Sometimes picks 2nd/3rd best
+  },
+  HARD: {
+    COST: 100,
+    REWARD: 120,
+    TURN_VALUE: 35,
+    POINT_VALUE: 75,
+    PRIME_VALUE: 60,
+    RISK: 1.0,
+    RANDOM: 0 // NO randomness
+  }
+}
+export const PROGRESSION = {
+  OPENING: 0,
+  CONTACT: 1,
+  RACING: 2,
+  BEAR_OFF: 3,
+}
+export const THREATS = {
+  WEAK: 0,
+  ESCAPING: 1,
+  STRONG: 2,
+}
 export const HOME = {
   [BLACK]: [1, 2, 3, 4, 5, 6],
   [WHITE]: [24, 23, 22, 21, 20, 19]
