@@ -95,11 +95,14 @@ export const useGameStore = create((set, get) => {
     difficulty: LEVELS.EASY,
     audio: true,
 
-    acceptDouble: () =>
+    acceptDouble: () => {
+      const newStake = Math.min(get().stake * 2, 64)
       set(state => ({
-        stake: Math.min(state.stake * 2, 64),
+        stake: newStake,
         hasCube: getOpponent(state.currentPlayer),
-      })),
+      }))
+      return newStake
+    },
 
     applyMove: (from, roll, player) => {
       let hitOccurred = false

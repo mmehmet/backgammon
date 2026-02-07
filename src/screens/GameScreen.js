@@ -81,6 +81,11 @@ const GameScreen = ({ onEndGame }) => {
     ? { paddingLeft: insets.left }
     : { paddingRight: insets.right }
 
+  const canDouble = () => {
+    if (!currentPlayer || stake >= 64) return false
+    return hasCube === null || hasCube === currentPlayer
+  }
+
   React.useEffect(() => {
     Orientation.lockToLandscape()
     const initial = Orientation.getInitialOrientation()
@@ -135,6 +140,21 @@ const GameScreen = ({ onEndGame }) => {
     if (!go) return
     
     if (dice.length < 1) {
+      if (canDouble()) {
+        setThinking(true)
+        const checkDouble = async () => {
+          const yes = await provider.shouldDouble({ board, bar })
+          setThinking(false)
+          if (yes) {
+            setShowDouble(true)
+          } else {
+            setTimeout(() => roll(BLACK), 2000)
+          }
+        }
+
+        checkDouble()
+        return
+      }
       setTimeout(() => roll(BLACK), 2000)
       return
     }
@@ -237,6 +257,25 @@ const GameScreen = ({ onEndGame }) => {
     }
   }, [points])
 
+  React.useEffect(() => {
+    if (!showDouble || !ai) return
+    if (currentPlayer === BLACK) return  // AI is offering, not responding
+
+    // AI needs to respond to player's double offer
+    setThinking(true)
+    const respond = async () => {
+      const shouldAccept = await provider.shouldAcceptDouble({ board, bar })
+      if (shouldAccept) {
+        handleAccept()
+      } else {
+        handleDecline()
+      }
+      setThinking(false)
+    }
+
+    setTimeout(respond, 1500)  // Brief delay so player sees the offer
+  }, [showDouble, ai, currentPlayer])
+
   const findDestination = (dropX, dropY) => {
     // Check bear-off first
     const bx = places[0]
@@ -264,16 +303,16 @@ const GameScreen = ({ onEndGame }) => {
   }
 
   const handleAccept = async () => {
-    acceptDouble()
+    const newStake = acceptDouble()
     await saveGame()
     setShowDouble(false)
+    setMessage(formatMsg(MSG.ACCEPTED, { stake: newStake }))
   }
 
   const handleDecline = () => {
     console.log("GAME OVER - FORFEIT")
-    const winner = getOpponent(currentPlayer)
-    const earned = updatePoints(winner)
-    setMessage(`${ucFirst(winner)} wins ${earned} points due to forfeit`)
+    const earned = updatePoints(currentPlayer)
+    setMessage(formatMsg(MSG.DECLINED, { player: ucFirst(winner), points: earned }))
     setShowDouble(false)
 
     setTimeout(() => {
@@ -434,6 +473,8 @@ const GameScreen = ({ onEndGame }) => {
     }
 
     if (showDouble) {
+      if (ai && currentPlayer === WHITE) return null
+
       return (
         <Offer
           onAccept={handleAccept}
@@ -482,9 +523,7 @@ const GameScreen = ({ onEndGame }) => {
           onPress={handleRoll}
           disabled={ai && currentPlayer === BLACK}
         />
-        {hasCube !== getOpponent(currentPlayer) && stake < 64 && (
-          <DoublingButton onPress={showDoubling} />
-        )}
+        {canDouble() && !(ai && currentPlayer === BLACK) && <DoublingButton onPress={showDoubling} />}
       </View>
     );
   }

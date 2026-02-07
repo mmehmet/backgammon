@@ -8,7 +8,6 @@ export const Cube = ({ value, owner }) => {
   if (value === 1) return null
 
   const isWhite = owner === WHITE
-  console.debug(isWhite)
   const bg = isWhite
     ? styles.buttonWhite
     : styles.buttonBlack

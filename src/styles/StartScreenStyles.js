@@ -44,6 +44,7 @@ const styles = StyleSheet.create({
     height: 4,
     backgroundColor: COLOURS.mediumGrey,
     borderRadius: 2,
+    zIndex: 1,
   },
   sliderThumb: {
     width: 40,
@@ -51,7 +52,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: COLOURS.lightGrey,
     position: 'absolute',
+    zIndex: 3,
   },
+  sliderZone: { paddingTop: 30, zIndex: 2, marginTop: -30 },
   sliderLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -60,6 +63,7 @@ const styles = StyleSheet.create({
     color: COLOURS.white,
     fontSize: 14,
     fontWeight: 600,
+    paddingHorizontal: 4,
   },
 })
 

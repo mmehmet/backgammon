@@ -82,9 +82,15 @@ const Settings = ({ onSubmit }) => {
           </GestureDetector>
         </View>
         <View style={styles.sliderLabels}>
-          <Text style={styles.sliderLabel}>Easy</Text>
-          <Text style={styles.sliderLabel}>Medium</Text>
-          <Text style={styles.sliderLabel}>Hard</Text>
+          <Pressable style={styles.sliderZone} onPress={() => setDifficulty(LEVELS.EASY)}>
+            <Text style={styles.sliderLabel}>Easy</Text>
+          </Pressable>
+          <Pressable style={styles.sliderZone} onPress={() => setDifficulty(LEVELS.MEDIUM)}>
+            <Text style={styles.sliderLabel}>Medium</Text>
+          </Pressable>
+          <Pressable style={styles.sliderZone} onPress={() => setDifficulty(LEVELS.HARD)}>
+            <Text style={styles.sliderLabel}>Hard</Text>
+          </Pressable>
         </View>
       </View>
     )
