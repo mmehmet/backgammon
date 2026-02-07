@@ -7,7 +7,7 @@ import { ucFirst } from '../utils/helpers'
 export const Offer = ({ onAccept, onDecline, from }) => (
   <View style={CS.gap}>
     <Text style={styles.text}>{ucFirst(from)} offers to Double</Text>
-    <View style={[CS.row, CS.gap, CS.centre]}>
+    <View style={[CS.rowGap, CS.centre]}>
       <Pressable style={[styles.button]} onPress={onDecline}>
         <Text style={styles.text}>❌ No</Text>
       </Pressable>

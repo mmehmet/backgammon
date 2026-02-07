@@ -62,9 +62,9 @@ const GameScreen = ({ onEndGame }) => {
     stake,
     hasCube,
     phase,
-    audio,
     ai,
     difficulty,
+    audio,
     acceptDouble,
     endGame,
     resetBoard,
@@ -127,7 +127,7 @@ const GameScreen = ({ onEndGame }) => {
 
   React.useEffect(() => {
     if (ai && whiteRoll > 0 && blackRoll === 0 && !resolving) {
-      setTimeout(() => roll(BLACK), 2000)
+      setTimeout(() => roll(BLACK), 300)
     }
   }, [whiteRoll, blackRoll, ai, resolving])
   
@@ -394,7 +394,7 @@ const GameScreen = ({ onEndGame }) => {
           <Text style={[styles.text, phase === PHASE.FINISHED ? styles.buttonText : styles.message]}>{message}</Text>
         </View>
 
-        <View style={[CS.row, CS.gap]}>{renderDiceArea()}</View>
+        <View style={[CS.rowGap]}>{renderDiceArea()}</View>
 
         <View style={[CS.gap, CS.centre]}>
           <Scoreboard points={points} red />
@@ -501,39 +501,36 @@ const GameScreen = ({ onEndGame }) => {
       </View>
   )
 
-  const renderOpeningRoll = () => {
-    let blackButton = null
-    if (!ai) {
-      blackButton = <RollButton player={BLACK} onPress={() => roll(BLACK)} />
-    }
+  const renderOpeningRoll = () => (
+    <View style={CS.container}>
+      <Text style={styles.text}>{message || 'Roll to determine who starts'}</Text>
 
-    return (
-      <View style={CS.container}>
-        <Text style={styles.text}>{message || 'Roll to determine who starts'}</Text>
-
-        <View style={CS.row}>
-          <View style={styles.rollSection}>
-            {whiteRoll > 0 && <Dice value={whiteRoll} />}
-            {whiteRoll === 0 && (
-              resolving === WHITE
-                ? <AnimatedDice color={WHITE} />
-                : <RollButton player={WHITE} onPress={() => roll(WHITE)} />
-            )}
-          </View>
-
-          <View style={styles.rollSection}>
-            {blackRoll > 0 && <Dice value={blackRoll} inverted />}
-            {blackRoll === 0 && (
-              resolving === BLACK
-                ? <AnimatedDice color={BLACK} />
-                : blackButton
-            )}
-          </View>
+      <View style={CS.row}>
+        <View style={styles.rollSection}>
+          {whiteRoll > 0 && <Dice value={whiteRoll} />}
+          {whiteRoll === 0 && (
+            resolving === WHITE
+              ? <AnimatedDice color={WHITE} audio={audio} />
+              : <RollButton player={WHITE} onPress={() => roll(WHITE)} />
+          )}
         </View>
-        <ExitButton onEndGame={onEndGame} />
+
+        <View style={styles.rollSection}>
+          {blackRoll > 0 && <Dice value={blackRoll} inverted />}
+          {blackRoll === 0 && (
+            resolving === BLACK
+              ? <AnimatedDice color={BLACK} audio={audio} />
+              : <RollButton
+                player={BLACK}
+                disabled={ai}
+                onPress={() => {if (!ai) roll(BLACK)}}
+              />
+          )}
+        </View>
       </View>
-    )
-  }
+      <ExitButton onEndGame={onEndGame} />
+    </View>
+  )
 
   const renderPositions = (start, end) => {
     const rotation = start < 13 ? 180 : 0

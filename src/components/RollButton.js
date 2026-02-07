@@ -5,13 +5,21 @@ import CS from "../styles/CommonStyles"
 import { COLOURS } from "../utils/colours"
 import { WHITE } from "../utils/constants"
 
-export const RollButton = ({ player = null, onPress, currentPlayer = null }) => {
+export const RollButton = ({ player = null, onPress, currentPlayer = null, disabled = false }) => {
   const isWhite = player === WHITE || currentPlayer === WHITE
-  const font = !currentPlayer ? null : CS.buttonTextRegular
+  const font = !currentPlayer ? [] : [CS.buttonTextRegular]
+  const styling = [CS.button, CS.align, CS.rowGap, isWhite ? CS.bgWhite : CS.bgBlack]
+  if (disabled) {
+    styling.push({ backgroundColor: COLOURS.darkGrey })
+    font.push({ color: COLOURS.grey })
+  }
+  if (isWhite) {
+    font.push(CS.buttonTextDark)
+  }
 
   return (
-    <Pressable style={[CS.button, CS.align, CS.row, CS.gap, isWhite ? CS.bgWhite : CS.bgBlack]} onPress={onPress}>
-      <Text style={[CS.buttonText, font, isWhite && CS.buttonTextDark]}>Roll</Text>
+    <Pressable style={styling} onPress={onPress}>
+      <Text style={[CS.buttonText, font]}>Roll</Text>
       {
         !currentPlayer
           ? null

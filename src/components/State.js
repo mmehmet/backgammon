@@ -208,15 +208,15 @@ export const useGameStore = create((set, get) => {
       hasCube: null,
     }),
 
-    resetState: (ai, difficulty, audio) => set({
+    resetState: (aiPlayer, level, useAudio) => set({
       points: { [WHITE]: 0, [BLACK]: 0 },
       currentPlayer: null,
       dice: [],
       remainingMoves: [],
       phase: PHASE.OPENING,
-      ai: ai,
-      difficulty: difficulty,
-      audio: audio,
+      ai: aiPlayer,
+      difficulty: level,
+      audio: useAudio,
     }),
 
     restoreGame: async () => {

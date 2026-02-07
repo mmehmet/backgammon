@@ -10,6 +10,7 @@ const CS = StyleSheet.create({
   centre: { alignItems: "center", justifyContent: "center" },
   align: { alignItems: "center" },
   row: { flexDirection: "row" },
+  rowGap: { flexDirection: 'row', gap: 8 },
   flex: { flex: 1 },
   gap: { gap: 8 },
   gap1: { gap: 1 },
