@@ -13,31 +13,31 @@ export const LEVELS = {
   HARD: 2
 }
 export const AI_CONFIG = {
-  EASY: {
+  [LEVELS.EASY]: {
     COST: 30,
     REWARD: 40,
     TURN_VALUE: 10,
     POINT_VALUE: 20,
     PRIME_VALUE: 15,
-    RISK: 0.3,
-    RANDOM: 0.25 // 25% random moves
+    RISK: 0.7, // HIGH risk tolerance
+    RANDOM: 0.6 // 60% chance of bad moves
   },
-  MEDIUM: {
+  [LEVELS.MEDIUM]: {
     COST: 70,
     REWARD: 85,
     TURN_VALUE: 25,
     POINT_VALUE: 50,
     PRIME_VALUE: 40,
-    RISK: 0.7,
-    RANDOM: 0.15 // Sometimes picks 2nd/3rd best
+    RISK: 0.3, // MODERATE level of competence
+    RANDOM: 0.3 // 30% chance of brain fart
   },
-  HARD: {
+  [LEVELS.HARD]: {
     COST: 100,
     REWARD: 120,
     TURN_VALUE: 35,
     POINT_VALUE: 75,
     PRIME_VALUE: 60,
-    RISK: 1.0,
+    RISK: 0, // NO appetite for RISK
     RANDOM: 0 // NO randomness
   }
 }

@@ -1,5 +1,5 @@
 import BaseProvider from './BaseProvider'
-import { PROGRESSION, THREATS } from "../../utils/constants"
+import { PROGRESSION, THREATS } from "../../../utils/constants"
 
 const evaluate = (player, board) => {
   // TODO: Calculate position strength for doubling decisions
@@ -51,6 +51,8 @@ class LocalProvider extends BaseProvider {
     // TODO: evaluate best next move
     return []
   }
+
+  getName = () => "LOCAL"
 
   shouldDouble = async ({ board, bar, stake }) => {
     // TODO: evaluate position strength

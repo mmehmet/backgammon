@@ -91,14 +91,13 @@ const GameScreen = ({ onEndGame }) => {
   }, [])
 
   React.useEffect(() => {
-    if (ai) {
-      ProviderFactory.create().then(p => {
-        if (p) {
-          p.setDifficulty(difficulty)
-          setProvider(p)
-        }
-      })
-    }
+    if (!ai) return
+
+    ProviderFactory.create().then(p => {
+      p.setDifficulty(difficulty)
+      setProvider(p)
+      console.log(p.getName())
+    })
   }, [ai, difficulty])
 
   React.useEffect(() => {
@@ -136,11 +135,22 @@ const GameScreen = ({ onEndGame }) => {
     if (!go) return
     
     if (dice.length < 1) {
-      setTimeout(() => roll(BLACK), 1000)
+      setTimeout(() => roll(BLACK), 2000)
       return
     }
     
     if (remainingMoves.length < 1) return
+
+    const available = getLegalMoves(BLACK, remainingMoves)
+    if (available.length < 2) {
+      if (available.length > 0) {
+        const { from, roll } = available[0]
+        applyMove(from, roll, BLACK)
+        setTimeout(() => executeMove(roll), 1500)
+      }
+
+      return
+    }
     
     const execute = async () => {
       setThinking(true)
@@ -149,9 +159,10 @@ const GameScreen = ({ onEndGame }) => {
 
       for (const { from, to } of moves) {
         const roll = moveToRoll(from, to)
+        console.log("roll", roll, "from", from, "to", to)
         applyMove(from, roll, BLACK)
         executeMove(roll)
-        await new Promise(resolve => setTimeout(resolve, 500))
+        await new Promise(resolve => setTimeout(resolve, 1500))
       }
     }
     
@@ -313,6 +324,12 @@ const GameScreen = ({ onEndGame }) => {
     onEndGame()
   }
 
+  const handleRoll = () => {
+    if (ai && currentPlayer === BLACK) return
+
+    roll(currentPlayer)
+  }
+
   const isOpening = () => phase === PHASE.OPENING
 
   const renderBar = () => {
@@ -462,7 +479,8 @@ const GameScreen = ({ onEndGame }) => {
       <View style={CS.gap}>
         <RollButton
           currentPlayer={currentPlayer}
-          onPress={() => roll(currentPlayer)}
+          onPress={handleRoll}
+          disabled={ai && currentPlayer === BLACK}
         />
         {hasCube !== getOpponent(currentPlayer) && stake < 64 && (
           <DoublingButton onPress={showDoubling} />
