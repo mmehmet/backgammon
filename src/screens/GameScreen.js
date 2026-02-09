@@ -312,7 +312,7 @@ const GameScreen = ({ onEndGame }) => {
   const handleDecline = () => {
     console.log("GAME OVER - FORFEIT")
     const earned = updatePoints(currentPlayer)
-    setMessage(formatMsg(MSG.DECLINED, { player: ucFirst(winner), points: earned }))
+    setMessage(formatMsg(MSG.DECLINED, { player: ucFirst(currentPlayer), points: earned }))
     setShowDouble(false)
 
     setTimeout(() => {
