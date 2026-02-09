@@ -77,9 +77,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.backgammon"
+    namespace "com.mehmetech.backgammon"
     defaultConfig {
-        applicationId "com.backgammon"
+        applicationId "com.mehmetech.backgammon"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
