@@ -5,7 +5,7 @@ export const LANDSCAPE_RIGHT = 'LANDSCAPE-RIGHT'
 export const GAMMON = 'GAMMON'
 export const BACKGAMMON = 'BACKGAMMON'
 
-export const API_URL = 'http://46.224.159.43'
+export const API_URL = 'https://wildbg.showeb.net'
 
 export const LEVELS = {
   EASY: 0,
