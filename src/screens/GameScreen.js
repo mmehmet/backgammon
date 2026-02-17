@@ -177,8 +177,10 @@ const GameScreen = ({ onEndGame }) => {
       const moves = await provider.getMove({ dice, board, bar, remainingMoves })
       setThinking(false)
 
-      for (const { from, to } of moves) {
+      for (let { from, to } of moves) {
         const roll = moveToRoll(from, to)
+        if (from > 24) from = -1
+
         console.log("roll", roll, "from", from, "to", to)
         applyMove(from, roll, BLACK)
         executeMove(roll)
