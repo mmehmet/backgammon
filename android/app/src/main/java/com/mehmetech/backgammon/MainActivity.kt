@@ -1,4 +1,4 @@
-package com.backgammon
+package com.mehmetech.backgammon
 
 import android.content.Intent
 import android.content.res.Configuration

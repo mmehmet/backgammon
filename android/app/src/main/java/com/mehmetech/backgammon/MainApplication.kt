@@ -1,4 +1,4 @@
-package com.backgammon
+package com.mehmetech.backgammon
 
 import android.app.Application
 import com.facebook.react.PackageList

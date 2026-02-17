@@ -152,7 +152,7 @@ const GameScreen = ({ onEndGame }) => {
           }
         }
 
-        checkDouble()
+        checkDouble().then()
         return
       }
       setTimeout(() => roll(BLACK), 2000)
@@ -263,12 +263,12 @@ const GameScreen = ({ onEndGame }) => {
     if (!showDouble || !ai) return
     if (currentPlayer === BLACK) return  // AI is offering, not responding
 
-    // AI needs to respond to player's double offer
+    // AI needs to respond to the player's double offer
     setThinking(true)
     const respond = async () => {
       const shouldAccept = await provider.shouldAcceptDouble({ board, bar })
       if (shouldAccept) {
-        handleAccept()
+        await handleAccept()
       } else {
         handleDecline()
       }
