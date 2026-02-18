@@ -146,7 +146,7 @@ const GameScreen = ({ onEndGame }) => {
           const yes = await provider.shouldDouble({ board, bar })
           setThinking(false)
           if (yes) {
-            setShowDouble(true)
+            showDoubling()
           } else {
             setTimeout(() => roll(BLACK), 2000)
           }
@@ -190,7 +190,7 @@ const GameScreen = ({ onEndGame }) => {
     
     const timer = setTimeout(execute, 1500)
     return () => clearTimeout(timer)
-  }, [ai, provider, currentPlayer, phase, dice, remainingMoves])
+  }, [ai, provider, currentPlayer, phase, dice, remainingMoves, showDouble])
 
   React.useEffect(() => {
     if (phase !== PHASE.PLAYING || !currentPlayer) return
@@ -684,8 +684,11 @@ const GameScreen = ({ onEndGame }) => {
       setResolving(null)
     }, 840)
   }
-  
-  const showDoubling = () => setShowDouble(true)
+
+  const showDoubling = () => {
+    setMessage(MSG.EMPTY)
+    setShowDouble(true)
+  };
 
   return (
     <View style={[styles.container, isOpening() ? CS.bgBlue : null, safeArea]}>
