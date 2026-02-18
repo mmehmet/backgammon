@@ -77,6 +77,7 @@ const GameScreen = ({ onEndGame }) => {
     saveGame,
     updatePoints,
   } = useGameStore()
+  const isAiTurn = ai && currentPlayer === BLACK
   const safeArea = orientation === LANDSCAPE_LEFT
     ? { paddingLeft: insets.left }
     : { paddingRight: insets.right }
@@ -366,7 +367,7 @@ const GameScreen = ({ onEndGame }) => {
   }
 
   const handleRoll = () => {
-    if (ai && currentPlayer === BLACK) return
+    if (isAiTurn) return
 
     roll(currentPlayer)
   }
@@ -390,7 +391,7 @@ const GameScreen = ({ onEndGame }) => {
             const isTopBlack = color === BLACK && i === 0
             const isTopWhite = color === WHITE && i === bar[BLACK]
             const isTopOfColor = isTopBlack || isTopWhite
-            const canMove = isTopOfColor && isCurrentPlayer && canMoveFromBar
+            const canMove = isTopOfColor && isCurrentPlayer && canMoveFromBar && !isAiTurn
 
             if (canMove) {
               return (
@@ -525,7 +526,7 @@ const GameScreen = ({ onEndGame }) => {
           onPress={handleRoll}
           disabled={ai && currentPlayer === BLACK}
         />
-        {canDouble() && !(ai && currentPlayer === BLACK) && <DoublingButton onPress={showDoubling} />}
+        {canDouble() && !isAiTurn && <DoublingButton onPress={showDoubling} />}
       </View>
     );
   }
@@ -639,7 +640,7 @@ const GameScreen = ({ onEndGame }) => {
                       Array(point.count).fill(undefined).map((_, i) => {
                         const isTopPiece = rotation === 180 ? i === point.count - 1 : i === 0
                         
-                        if (isTopPiece && canMoveFrom) {
+                        if (isTopPiece && canMoveFrom && !isAiTurn) {
                           return <DraggablePiece
                             key={i}
                             color={point.color}
