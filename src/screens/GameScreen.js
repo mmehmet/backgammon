@@ -163,19 +163,11 @@ const GameScreen = ({ onEndGame }) => {
     if (remainingMoves.length < 1) return
 
     const available = getLegalMoves(BLACK, remainingMoves)
-    if (available.length < 2) {
-      if (available.length > 0) {
-        const { from, roll } = available[0]
-        applyMove(from, roll, BLACK)
-        setTimeout(() => executeMove(roll), 1500)
-      }
-
-      return
-    }
+    if (available.length < 1) return
     
     const execute = async () => {
       setThinking(true)
-      const moves = await provider.getMove({ dice, board, bar, remainingMoves })
+      const moves = await provider.getMove({ board, bar, remainingMoves })
       setThinking(false)
 
       for (let { from, to } of moves) {
@@ -238,10 +230,9 @@ const GameScreen = ({ onEndGame }) => {
       console.log("GAME OVER")
       let msg = `${ucFirst(currentPlayer)} wins!`
       const earned = updatePoints(currentPlayer)
-      if (earned > 1) {
-        const label = earned > 2 ? BACKGAMMON : GAMMON
-        msg = `${msg} - ${label}!`
-      }
+      const multiplier = earned / stake
+      if (multiplier === 3) msg = `${msg} - ${BACKGAMMON}!`
+      else if (multiplier === 2) msg = `${msg} - ${GAMMON}!`
       setMessage(msg)
       
       setTimeout(() => {
@@ -314,12 +305,14 @@ const GameScreen = ({ onEndGame }) => {
 
   const handleDecline = () => {
     console.log("GAME OVER - FORFEIT")
+    endGame()
     const earned = updatePoints(currentPlayer)
     setMessage(formatMsg(MSG.DECLINED, { player: ucFirst(currentPlayer), points: earned }))
     setShowDouble(false)
 
     setTimeout(() => {
       resetBoard()
+      startGame(currentPlayer)
     }, 2000)
   }
 

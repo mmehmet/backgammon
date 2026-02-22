@@ -47,7 +47,7 @@ const score = (moves, player, board) => {
 }
 
 class LocalProvider extends BaseProvider {
-  getMove = async ({ dice, board, bar, remainingMoves }) => {
+  getMove = async ({ board, bar, remainingMoves }) => {
     // TODO: evaluate best next move
     return []
   }

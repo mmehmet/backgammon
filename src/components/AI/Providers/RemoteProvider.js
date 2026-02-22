@@ -23,17 +23,15 @@ const reformat = (board, bar, dice = []) => {
     }
   }
 
-  if (dice.length > 0) {
-    params.set('die1', dice[0])
-    params.set('die2', dice[1])
-  }
+  if (dice.length > 0) params.set('die1', dice[0])
+  if (dice.length > 1) params.set('die2', dice[1])
 
   return params.toString()
 }
 
 class RemoteProvider extends BaseProvider {
-  getMove = async ({ dice, board, bar }) => {
-    const params = reformat(board, bar, dice)
+  getMove = async ({ remainingMoves, board, bar }) => {
+    const params = reformat(board, bar, remainingMoves)
     const response = await fetch(`${API_URL}/move?${params}`)
     const data = await response.json()
 
