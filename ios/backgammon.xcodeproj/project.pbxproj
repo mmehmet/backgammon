@@ -15,6 +15,8 @@
 		E0C38EA52F2C45D500A87385 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E0C38EA42F2C45D500A87385 /* AVFoundation.framework */; };
 		E0C38EA72F2C45E000A87385 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E0C38EA62F2C45E000A87385 /* AudioToolbox.framework */; };
 		E0C38EA92F2C480A00A87385 /* dice_roll.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = E0C38EA82F2C480A00A87385 /* dice_roll.mp3 */; };
+		E0F3142E2F4CF5AF0024EA8B /* move.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = E0F3142D2F4CF5AF0024EA8B /* move.mp3 */; };
+		E0F3142F2F4CF5AF0024EA8B /* hit.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = E0F3142C2F4CF5AF0024EA8B /* hit.mp3 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +32,8 @@
 		E0C38EA42F2C45D500A87385 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		E0C38EA62F2C45E000A87385 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		E0C38EA82F2C480A00A87385 /* dice_roll.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = dice_roll.mp3; sourceTree = "<group>"; };
+		E0F3142C2F4CF5AF0024EA8B /* hit.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = hit.mp3; sourceTree = "<group>"; };
+		E0F3142D2F4CF5AF0024EA8B /* move.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = move.mp3; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -80,6 +84,8 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				E0F3142C2F4CF5AF0024EA8B /* hit.mp3 */,
+				E0F3142D2F4CF5AF0024EA8B /* move.mp3 */,
 				E0C38EA82F2C480A00A87385 /* dice_roll.mp3 */,
 				13B07FAE1A68108700A75B9A /* backgammon */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
@@ -173,6 +179,8 @@
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				2F703AEBAF114ECE8DB42FF7 /* PrivacyInfo.xcprivacy in Resources */,
+				E0F3142E2F4CF5AF0024EA8B /* move.mp3 in Resources */,
+				E0F3142F2F4CF5AF0024EA8B /* hit.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -203,13 +211,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-backgammon/Pods-backgammon-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-backgammon/Pods-backgammon-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -246,13 +250,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-backgammon/Pods-backgammon-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-backgammon/Pods-backgammon-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -281,7 +281,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 202602181;
+				CURRENT_PROJECT_VERSION = 202602231;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 7HZ2QY5BNM;
 				ENABLE_BITCODE = NO;
@@ -321,7 +321,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 202602181;
+				CURRENT_PROJECT_VERSION = 202602231;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 7HZ2QY5BNM;
 				INFOPLIST_FILE = backgammon/Info.plist;

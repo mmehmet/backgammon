@@ -33,6 +33,10 @@ import {
   GAMMON,
 } from '../utils/constants'
 import { getRoll, ucFirst, formatMsg, moveToRoll } from '../utils/helpers'
+import Sound from "react-native-sound"
+
+const HIT = 'hit.mp3'
+const MOVE = 'move.mp3'
 
 const GameScreen = ({ onEndGame }) => {
   const insets = useSafeAreaInsets()
@@ -175,8 +179,9 @@ const GameScreen = ({ onEndGame }) => {
         if (from > 24) from = -1
 
         console.log("roll", roll, "from", from, "to", to)
-        applyMove(from, roll, BLACK)
+        const wasHit = applyMove(from, roll, BLACK)
         executeMove(roll)
+        playSound(wasHit ? HIT : MOVE)
         await new Promise(resolve => setTimeout(resolve, 1500))
       }
     }
@@ -236,7 +241,7 @@ const GameScreen = ({ onEndGame }) => {
       setMessage(msg)
       
       setTimeout(() => {
-        resetBoard()
+        newGame()
       }, 2000)
     }
   }, [bearOff, currentPlayer])
@@ -311,8 +316,7 @@ const GameScreen = ({ onEndGame }) => {
     setShowDouble(false)
 
     setTimeout(() => {
-      resetBoard()
-      startGame(currentPlayer)
+      newGame()
     }, 2000)
   }
 
@@ -341,11 +345,8 @@ const GameScreen = ({ onEndGame }) => {
 
     if (validMove) {
       const wasHit = applyMove(from, validMove.roll, currentPlayer)
-      if (wasHit) {
-        console.log('HIT!')
-        // Add hit sound/visual feedback here
-      }
       executeMove(validMove.roll)
+      playSound(wasHit ? HIT : MOVE)
     }
   }
 
@@ -366,6 +367,30 @@ const GameScreen = ({ onEndGame }) => {
   }
 
   const isOpening = () => phase === PHASE.OPENING
+  
+  const newGame = () => {
+    if (audio) {
+      setTimeout(() => playSound(MOVE), 50)
+    }
+    resetBoard()
+    startGame(currentPlayer)
+  }
+  
+  const playSound = (file) => {
+    if (!audio) return
+
+    const sound = new Sound(file, Sound.MAIN_BUNDLE, (error) => {
+      if (error) {
+        console.log('Failed to load sound', error)
+        return
+      }
+
+      sound.play((success) => {
+        if (!success) console.log('Sound playback failed')
+        sound.release()
+      })
+    })
+  }
 
   const renderBar = () => {
     const blackPieces = Array(bar[BLACK]).fill(BLACK)

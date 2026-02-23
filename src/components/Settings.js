@@ -18,7 +18,7 @@ const FULL = 40
 const HALF = 20
 const levels = [LEVELS.EASY, LEVELS.MEDIUM, LEVELS.HARD]
 
-const Settings = ({ onSubmit }) => {
+const Settings = ({ onSubmit, onBack }) => {
   const [ai, setAi] = React.useState(false)
   const [difficulty, setDifficulty] = React.useState(LEVELS.EASY)
   const [audio, setAudio] = React.useState(true)
@@ -68,6 +68,22 @@ const Settings = ({ onSubmit }) => {
 
   const handleSubmit = () => onSubmit({ ai, difficulty, audio })
 
+  const renderBackButton = () => {
+    if (!onBack) return null
+
+    return (
+      <Pressable style={[CS.button, CS.bgGrey]} onPress={onBack}>
+        <Text style={[CS.buttonText, CS.buttonTextDark]}>← Back</Text>
+      </Pressable>
+    )
+  }
+  
+  const renderStartButton = () => (
+    <Pressable style={CS.button} onPress={handleSubmit}>
+      <Text style={CS.buttonText}>Start Game</Text>
+    </Pressable>
+  )
+
   const renderDifficulty = () => {
     return (
       <View style={[CS.gap, !ai && { opacity: 0 }]} pointerEvents={ai ? 'auto' : 'none'}>
@@ -112,9 +128,10 @@ const Settings = ({ onSubmit }) => {
 
       {renderDifficulty()}
 
-      <Pressable style={CS.button} onPress={handleSubmit}>
-        <Text style={CS.buttonText}>Start Game</Text>
-      </Pressable>
+      <View style={[CS.row, CS.gap]}>
+        {renderBackButton()}
+        {renderStartButton()}
+      </View>
     </View>
   )
 }

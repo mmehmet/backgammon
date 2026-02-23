@@ -20,13 +20,15 @@ const StartScreen = ({ onStart, onContinue }) => {
   const handleNewGame = () => setShowSettings(true)
 
   const handleSubmitSettings = (settings) => onStart(settings)
+  
+  const hideSettings = () => setShowSettings(false)
 
   return (
     <View style={[CS.container, styles.bg]}>
       <Text style={styles.title}>Backgammon</Text>
       
       {showSettings ? (
-        <Settings onSubmit={handleSubmitSettings} />
+        <Settings onSubmit={handleSubmitSettings} onBack={hideSettings} />
       ) : (
       <View style={CS.gap}>
         <Pressable style={CS.button} onPress={handleNewGame}>
