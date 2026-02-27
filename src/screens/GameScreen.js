@@ -53,7 +53,10 @@ const GameScreen = ({ onEndGame }) => {
   const [provider, setProvider] = React.useState(null)
   const [thinking, setThinking] = React.useState(false)
 
-  const topHalf = Dimensions.get('window').height / 2
+  const { width, height } = Dimensions.get('window')
+  const isWide = width / height > 1.75  // basically 16x9
+  const maxHeight = height * 0.5625 // this is 9 / 16 * our height
+  const topHalf = height / 2
   const {
     points,
     board,
@@ -290,8 +293,8 @@ const GameScreen = ({ onEndGame }) => {
       const x = places[dest]
       if (x === undefined) continue
 
-      const leftBound = x
-      const rightBound = x + 55
+      const leftBound = x - 5
+      const rightBound = x + 50
 
       if (dropX >= leftBound && dropX <= rightBound) {
         return dest
@@ -466,7 +469,7 @@ const GameScreen = ({ onEndGame }) => {
     if (!currentPlayer) return null
 
     return (
-      <View style={styles.controls}>
+      <View style={[styles.controls, !isWide ? styles.controlsTall : null]}>
         <View style={styles.messageWrapper}>
           <Text style={[styles.text, phase === PHASE.FINISHED ? styles.buttonText : styles.message]}>{message}</Text>
         </View>
@@ -716,7 +719,7 @@ const GameScreen = ({ onEndGame }) => {
         ?
         renderOpeningRoll()
         :
-        <View style={styles.board}>
+        <View style={[styles.wrapper, isWide ? null : [styles.wrapperTall, { maxHeight: maxHeight }]]}>
           {renderControls()}
           <>
             {renderBoard()}

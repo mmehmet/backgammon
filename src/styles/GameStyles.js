@@ -6,7 +6,23 @@ import { COLOURS } from '../utils/colours'
 const gutterW = diameter + 16 + 2 // two 8px borders and a 1px padding
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLOURS.black, padding: 16 },
+  container: {
+    flex: 1,
+    backgroundColor: COLOURS.black,
+    padding: 16,
+    justifyContent: 'space-around',
+  },
+  wrapper: {
+    flex: 1,
+    gap: 2,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    backgroundColor: COLOURS.darkBrown,
+  },
+  wrapperTall: {
+    backgroundColor: COLOURS.black,
+    justifyContent: "center",
+  },
   board: {
     flex: 1,
     gap: 2,
@@ -19,7 +35,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 16,
+    backgroundColor: COLOURS.darkBrown,
   },
+  controlsTall: { maxWidth: 320 },
   gutter: { width: gutterW, gap: 1 },
   cubeFrame: { maxHeight: gutterW },
   frame: {
